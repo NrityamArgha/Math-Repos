@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Math Practice Quiz</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --orange:#FF9900; --dark:#232F3E; --dark2:#131A22; --green:#1D8102; --red:#D13212;
+    --gray:#f2f3f3; --border:#d5dbdb;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:"Amazon Ember","Helvetica Neue",Arial,sans-serif;
+    background:var(--gray); margin:0; padding:0; color:#16191f;
+  }
+  header{
+    background:var(--dark); color:#fff; padding:18px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  header h1{margin:0; font-size:20px; font-weight:600;}
+  header .badge{background:var(--orange); color:#16191f; font-weight:700; padding:4px 10px; border-radius:4px; font-size:13px;}
+  .container{max-width:880px; margin:24px auto; padding:0 16px;}
+  .card{background:#fff; border:1px solid var(--border); border-radius:8px; padding:24px; margin-bottom:20px; box-shadow:0 1px 2px rgba(0,0,0,.05);}
+  .setup-grid{display:flex; gap:20px; flex-wrap:wrap; margin-top:10px;}
+  .field{flex:1; min-width:220px;}
+  .field label{display:block; font-weight:600; margin-bottom:6px; font-size:14px;}
+  select{
+    width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; font-size:14px; background:#fff;
+  }
+  .btn{
+    background:var(--orange); color:#16191f; border:none; padding:12px 22px; font-size:15px; font-weight:700;
+    border-radius:4px; cursor:pointer; margin-top:18px;
+  }
+  .btn:hover{background:#e88b00;}
+  .btn.secondary{background:#fff; border:1px solid var(--dark); color:var(--dark);}
+  .btn.secondary:hover{background:#eee;}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+  .progress-bar{height:8px; background:#e7e9e9; border-radius:4px; overflow:hidden; margin-bottom:14px;}
+  .progress-fill{height:100%; background:var(--orange); width:0%; transition:width .3s;}
+  .meta-row{display:flex; justify-content:space-between; font-size:13px; color:#545b64; margin-bottom:10px; flex-wrap:wrap; gap:6px;}
+  .domain-tag{background:var(--dark); color:#fff; padding:2px 10px; border-radius:12px; font-size:12px;}
+  .q-type-tag{background:#eaeded; color:#16191f; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600;}
+  .timer-tag{background:#eaeded; color:#16191f; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:700; font-variant-numeric:tabular-nums;}
+  .timer-tag.timer-warning{background:#fdf0ee; color:var(--red);}
+  .question-text{font-size:17px; font-weight:600; margin:10px 0 18px; line-height:1.4;}
+  .option{
+    display:flex; align-items:flex-start; gap:10px; border:1px solid var(--border); border-radius:6px;
+    padding:12px 14px; margin-bottom:10px; cursor:pointer; background:#fff; transition:background .15s;
+  }
+  .option:hover{background:#f8f8f8;}
+  .option input{margin-top:3px; flex-shrink:0;}
+  .option .opt-letter{font-weight:700; margin-right:4px;}
+  .option.correct-ans{border-color:var(--green); background:#f0fbef;}
+  .option.wrong-ans{border-color:var(--red); background:#fdf0ee;}
+  .explanation-box{
+    margin-top:6px; margin-bottom:10px; padding:10px 12px; border-radius:6px; font-size:13.5px; line-height:1.5;
+    border-left:4px solid var(--border); background:#fafafa; display:none;
+  }
+  .explanation-box.show{display:block;}
+  .explanation-box.exp-correct{border-left-color:var(--green); background:#f0fbef;}
+  .explanation-box.exp-wrong{border-left-color:var(--red); background:#fdf0ee;}
+  .result-banner{
+    padding:14px 16px; border-radius:6px; font-weight:700; margin-bottom:16px; font-size:15px;
+  }
+  .result-banner.correct{background:#f0fbef; color:var(--green); border:1px solid var(--green);}
+  .result-banner.incorrect{background:#fdf0ee; color:var(--red); border:1px solid var(--red);}
+  .result-banner.timeup{background:#fdf6ee; color:#8a5a00; border:1px solid var(--orange);}
+  .nav-row{display:flex; justify-content:space-between; margin-top:18px; gap:10px; flex-wrap:wrap;}
+  .summary-table{width:100%; border-collapse:collapse; margin-top:14px; font-size:14px; table-layout:fixed;}
+  .summary-table th, .summary-table td{border:1px solid var(--border); padding:8px 10px; text-align:left; vertical-align:top; word-wrap:break-word; overflow-wrap:break-word;}
+  .summary-table th{background:var(--dark); color:#fff;}
+  .summary-table th:nth-child(1), .summary-table td:nth-child(1){width:30px;}
+  .summary-table th:nth-child(2), .summary-table td:nth-child(2){width:30%;}
+  .summary-table th:nth-child(3), .summary-table td:nth-child(3){width:80px;}
+  .summary-table th:nth-child(4), .summary-table td:nth-child(4){width:80px;}
+  .summary-table th:nth-child(5), .summary-table td:nth-child(5){width:auto;}
+  .score-circle{
+    width:140px; height:140px; border-radius:50%; border:10px solid var(--orange); display:flex; align-items:center;
+    justify-content:center; font-size:30px; font-weight:700; margin:10px auto; color:var(--dark);
+  }
+  .center{text-align:center;}
+  .hidden{display:none !important;}
+  .footer-note{font-size:12px; color:#878787; text-align:center; margin:30px 0 10px;}
+  .review-q{font-weight:700; margin-bottom:6px;}
+  .pill-correct{color:var(--green); font-weight:700;}
+  .pill-wrong{color:var(--red); font-weight:700;}
+  .pill-skipped{color:#8a5a00; font-weight:700;}
+
+  /* --- Endless Mode additions --- */
+  .setup-row{display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;}
+  .setup-card{flex:1; min-width:300px; margin-bottom:0;}
+  .endless-setup-card{border-top:4px solid var(--orange);}
+  .endless-start-row{display:flex; align-items:center; gap:16px; margin-top:18px; flex-wrap:wrap;}
+  .endless-start-row .btn{margin-top:0;}
+  #endlessHighScoreText{font-weight:700; font-size:14px; color:var(--dark);}
+  .end-endless-btn{background:#fff; border:1px solid var(--red); color:var(--red); margin-top:0;}
+  .end-endless-btn:hover{background:#fdf0ee;}
+  .endless-layout{display:flex; gap:24px; flex-wrap:wrap;}
+  .endless-main{flex:3; min-width:280px;}
+  .difficulty-sidebar{flex:1; min-width:170px; background:var(--gray); border:1px solid var(--border); border-radius:8px; padding:16px;}
+  .difficulty-sidebar h3{margin:0 0 10px; font-size:15px;}
+  .diff-ladder{display:flex; flex-direction:column; gap:6px; margin-bottom:18px;}
+  .diff-step{padding:9px 10px; border-radius:6px; font-size:13px; font-weight:700; text-align:center; background:#fff; border:1px solid var(--border); color:#8a8f94; transition:background .2s, color .2s, border-color .2s, transform .2s;}
+  .diff-step.active{transform:scale(1.05); box-shadow:0 1px 3px rgba(0,0,0,.15);}
+  .endless-stats{display:flex; flex-direction:column; gap:10px;}
+  .stat-box{background:#fff; border:1px solid var(--border); border-radius:6px; padding:10px; text-align:center;}
+  .stat-label{display:block; font-size:11px; color:#545b64; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;}
+  .stat-value{display:block; font-size:22px; font-weight:700; color:var(--dark);}
+  @media (max-width:600px){
+    .setup-card{min-width:100%;}
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1 id="pageTitle">Math Practice Quiz</h1>
+  <span class="badge" id="topicBadge">Beginner Math</span>
+</header>
+
+<div class="container">
+
+  <!-- SETUP SCREENS -->
+  <div class="setup-row" id="setupRow">
+  <div class="card setup-card" id="setupScreen">
+    <h2>Set up your practice quiz</h2>
+    <p style="color:#545b64; font-size:14px;" id="setupDesc">Choose a topic and topic type, how many questions, the order, and an optional timer, then start. Every question is generated fresh, so you'll never run out of practice.</p>
+    <div class="setup-grid">
+      <div class="field">
+        <label for="topicSelect">Topic</label>
+        <select id="topicSelect">
+          <option value="percentage" selected>Percentage</option>
+          <option value="ratio">Ratio</option>
+          <option value="multiplication">Multiplication</option>
+          <option value="division">Division</option>
+          <option value="addition">Addition</option>
+          <option value="subtraction">Subtraction</option>
+          <option value="algebra1">1-Variable Algebra</option>
+          <option value="algebra2">2-Variable Algebra</option>
+        </select>
+      </div>
+
+      <!-- New Topic Type dropdown placed next to Topic -->
+      <div class="field">
+        <label for="topicTypeSelect">Topic Type</label>
+        <select id="topicTypeSelect">
+          <!-- options populated dynamically -->
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="numQuestions">Number of Questions</label>
+        <select id="numQuestions">
+          <option value="10">10 Questions</option>
+          <option value="20">20 Questions</option>
+          <option value="30">30 Questions</option>
+          <option value="50">50 Questions</option>
+          <option value="100" selected>100 Questions</option>
+        </select>
+      </div>
+    </div>
+    <div class="setup-grid">
+      <div class="field">
+        <label for="qOrder">Question Order</label>
+        <select id="qOrder">
+          <option value="sequential">Sequential (gets harder as you go)</option>
+          <option value="random">Random (mixed difficulty)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="timerSelect">Timer</label>
+        <select id="timerSelect">
+          <option value="0" selected>Unlimited (no timer)</option>
+          <option value="5">5 minutes</option>
+          <option value="10">10 minutes</option>
+          <option value="15">15 minutes</option>
+          <option value="20">20 minutes</option>
+          <option value="25">25 minutes</option>
+          <option value="30">30 minutes</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" id="startBtn">Start Practice Quiz</button>
+  </div>
+
+  <div class="card setup-card endless-setup-card" id="endlessSetupScreen">
+    <h2>Endless Mode</h2>
+    <p style="color:#545b64; font-size:14px;">Adaptive difficulty &mdash; get one right and the next question gets harder, get one wrong and it eases off. No question limit, no timer. See how high you can climb.</p>
+    <div class="field">
+      <label for="endlessTopicSelect">Topic</label>
+      <select id="endlessTopicSelect">
+        <option value="percentage" selected>Percentage</option>
+        <option value="ratio">Ratio</option>
+        <option value="multiplication">Multiplication</option>
+        <option value="division">Division</option>
+        <option value="addition">Addition</option>
+        <option value="subtraction">Subtraction</option>
+        <option value="algebra1">1-Variable Algebra</option>
+        <option value="algebra2">2-Variable Algebra</option>
+      </select>
+    </div>
+
+    <!-- Topic Type for Endless Mode -->
+    <div class="field" style="margin-top:10px;">
+      <label for="endlessTopicTypeSelect">Topic Type</label>
+      <select id="endlessTopicTypeSelect">
+        <!-- populated dynamically -->
+      </select>
+    </div>
+
+    <div class="endless-start-row">
+      <button class="btn" id="startEndlessBtn">Start Endless</button>
+      <span id="endlessHighScoreText">Highest Score: 0</span>
+    </div>
+  </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div class="card hidden" id="quizScreen">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="meta-row">
+      <span id="progressText">Question 1 of 100</span>
+      <span><span class="domain-tag" id="domainTag">Topic</span> &nbsp; <span class="q-type-tag" id="typeTag">Single Answer</span> &nbsp; <span class="timer-tag hidden" id="timerTag">05:00</span></span>
+    </div>
+    <div class="question-text" id="questionText"></div>
+    <div id="optionsContainer"></div>
+    <div id="selectionHint" style="font-size:13px;color:var(--red);min-height:16px;margin:-4px 0 8px;"></div>
+
+    <div id="resultBanner" class="result-banner hidden"></div>
+
+    <div class="nav-row">
+      <button class="btn secondary" id="checkBtn">Check Answer</button>
+      <button class="btn hidden" id="nextBtn">Next Question &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ENDLESS MODE SCREEN -->
+  <div class="card hidden" id="endlessScreen">
+    <div class="endless-layout">
+      <div class="endless-main">
+        <div class="meta-row">
+          <span id="endlessProgressText">Question 1</span>
+          <span><span class="domain-tag" id="endlessDomainTag">Topic</span> &nbsp; <span class="q-type-tag" id="endlessDifficultyTag">Easy</span></span>
+        </div>
+        <div class="question-text" id="endlessQuestionText"></div>
+        <div id="endlessOptionsContainer"></div>
+        <div id="endlessResultBanner" class="result-banner hidden"></div>
+        <div class="nav-row">
+          <button class="btn secondary" id="endlessCheckBtn" disabled>Check Answer</button>
+          <button class="btn hidden" id="endlessNextBtn">Next Question &rarr;</button>
+        </div>
+        <div class="center" style="margin-top:14px;">
+          <button class="btn end-endless-btn" id="endEndlessBtn">End Endless Mode</button>
+        </div>
+      </div>
+      <div class="difficulty-sidebar">
+        <h3>Difficulty</h3>
+        <div class="diff-ladder" id="diffLadder">
+          <div class="diff-step" data-level="4">Extreme</div>
+          <div class="diff-step" data-level="3">Very Hard</div>
+          <div class="diff-step" data-level="2">Hard</div>
+          <div class="diff-step" data-level="1">Medium</div>
+          <div class="diff-step" data-level="0">Easy</div>
+        </div>
+        <div class="endless-stats">
+          <div class="stat-box"><span class="stat-label">Score</span><span class="stat-value" id="endlessScoreVal">0</span></div>
+          <div class="stat-box"><span class="stat-label">Total Questions</span><span class="stat-value" id="endlessTotalVal">0</span></div>
+          <div class="stat-box"><span class="stat-label">Highest Score</span><span class="stat-value" id="endlessSidebarHighVal">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENDLESS RESULTS SCREEN -->
+  <div class="card hidden" id="endlessResultsScreen">
+    <h2 class="center">Endless Mode Results</h2>
+    <div class="score-circle" id="endlessScoreCircle">0</div>
+    <p class="center" id="endlessScoreText" style="font-size:16px;"></p>
+    <p class="center" id="endlessHighScoreNote" style="font-size:14px; font-weight:700;"></p>
+    <div class="center">
+      <button class="btn" id="endlessRestartBtn">Back to Setup</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="card hidden" id="resultsScreen">
+    <h2 class="center">Practice Quiz Results</h2>
+    <div class="score-circle" id="scoreCircle">0%</div>
+    <p class="center" id="scoreText" style="font-size:16px;"></p>
+    <p class="center hidden" id="timeUpNote" style="font-size:13px;color:#8a5a00;"></p>
+    <div class="center">
+      <button class="btn" id="restartBtn">Start New Practice Quiz</button>
+    </div>
+    <h3>Review Sheet</h3>
+    <table class="summary-table">
+      <thead><tr><th>#</th><th>Question</th><th>Result</th><th>Your Answer</th><th>Correct Answer</th></tr></thead>
+      <tbody id="summaryBody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer-note">Built for personal math practice &middot; Original practice content, not from any textbook or exam.</div>
+</div>
+
+<script>
+/* =====================================================================
+   TOPIC TYPES — sub-categories shown in the "Topic Type" dropdown
+   ===================================================================== */
+const TOPIC_TYPES = {
+  percentage: [
+    { value: 'regular', text: 'Regular' }
+  ],
+  ratio: [
+    { value: 'small', text: 'Small Ratios' },
+    { value: 'big', text: 'Big Ratios' }
+  ],
+  multiplication: [
+    { value: '1x1_to_1x2', text: '1 digit x 1 digit to 1 digit x 2 digit' },
+    { value: '2x2_to_2x3', text: '2 digit x 2 digit to 2 digit x 3 digit' },
+    { value: 'long_3x3_to_3x4', text: 'Long 3 digit by 3 digit to 3 digit by 4 digit' }
+  ],
+  division: [
+    { value: '2d_by_1d_whole', text: 'Regular 2 digit by 1 digit whole number' },
+    { value: '2d_by_1d_decimal', text: 'Regular 2 digit by 1 digit decimals' },
+    { value: '2d_by_2d_whole', text: 'Regular 2 digit by 2 digit whole number' },
+    { value: '2d_by_2d_decimal', text: 'Regular 2 digit by 2 digit decimal' }
+  ],
+  addition: [
+    { value: '2d_by_2d', text: '2 digit by 2 digit' },
+    { value: '3d_by_3d', text: '3 digit by 3 digit' },
+    { value: 'long_add', text: 'Long Addition (4digit + 5 digit to 6 digit + 7 digit)' }
+  ],
+  subtraction: [
+    { value: '3d_positive', text: '3 digit - (2 digits: 3 digits) Positive' },
+    { value: '3d_negative', text: '3 digit - (2 digits: 3 digits) Negative' },
+    { value: 'long_sub', text: 'Long (5 digit to 7 digit Negative and Positive)' }
+  ],
+  algebra1: [
+    { value: 'find_values', text: 'Finding values from equations' }
+  ],
+  algebra2: [
+    { value: 'find_values', text: 'Finding values from equations' }
+  ]
+};
+
+const TOPIC_LABELS = {
+  percentage: 'Percentage', ratio: 'Ratio', multiplication: 'Multiplication', division: 'Division',
+  addition: 'Addition', subtraction: 'Subtraction', algebra1: '1-Variable Algebra', algebra2: '2-Variable Algebra'
+};
+
+const LEVEL_LABELS = ['Easy', 'Medium', 'Hard', 'Very Hard', 'Extreme'];
+
+function populateTopicType(selectElem, topicKey) {
+  if (!selectElem) return;
+  const types = TOPIC_TYPES[topicKey] || [{ value: 'regular', text: 'Regular' }];
+  selectElem.innerHTML = '';
+  types.forEach((t, idx) => {
+    const opt = document.createElement('option');
+    opt.value = t.value;
+    opt.textContent = t.text;
+    if (idx === 0) opt.selected = true;
+    selectElem.appendChild(opt);
+  });
+}
+
+/* =====================================================================
+   QUESTION GENERATORS — every question is produced fresh, on demand,
+   so practice is never limited to a fixed bank. Each generator returns:
+   { domain, type:'single', question, options:[{letter,text,correct,explanation}] }
+   ===================================================================== */
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function shuffleArr(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function fmt(n) {
+  if (typeof n !== 'number') return String(n);
+  if (Number.isInteger(n)) return n.toString();
+  return (Math.round(n * 100) / 100).toString();
+}
+
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); return b === 0 ? a : gcd(b, a % b); }
+
+function randDigits(n) {
+  const lo = Math.pow(10, n - 1);
+  const hi = Math.pow(10, n) - 1;
+  return randInt(lo, hi);
+}
+
+function ensureNumericDistractors(correct, primaryCandidates, count, fallbackGen) {
+  const seen = new Set([String(fmt(correct))]);
+  const out = [];
+  for (const c of primaryCandidates) {
+    const key = String(fmt(c));
+    if (!seen.has(key) && isFinite(c)) { seen.add(key); out.push(c); }
+    if (out.length >= count) return out.map(fmt);
+  }
+  let guard = 0;
+  while (out.length < count && guard < 100) {
+    guard++;
+    const c = fallbackGen();
+    const key = String(fmt(c));
+    if (!seen.has(key) && isFinite(c)) { seen.add(key); out.push(c); }
+  }
+  return out.map(fmt);
+}
+
+function spreadFallback(correct, spreadFrac, allowDecimal) {
+  return () => {
+    const magnitude = Math.max(1, Math.abs(correct));
+    let delta = Math.max(1, Math.round(magnitude * spreadFrac * (Math.random() * 0.8 + 0.4)));
+    const sign = Math.random() < 0.5 ? -1 : 1;
+    let val = correct + sign * delta;
+    if (!allowDecimal) val = Math.round(val);
+    else val = Math.round(val * 100) / 100;
+    if (val === correct) val += sign * (allowDecimal ? 0.5 : 1);
+    return val;
+  };
+}
+
+function buildSingleQuestion(domain, questionText, correctText, distractorTexts, explanationBody) {
+  const letters = ['A', 'B', 'C', 'D'];
+  const items = shuffleArr([
+    { text: correctText, correct: true },
+    ...distractorTexts.map(t => ({ text: t, correct: false }))
+  ]);
+  const options = items.map((it, idx) => ({
+    letter: letters[idx],
+    text: it.text,
+    correct: it.correct,
+    explanation: (it.correct ? 'Correct. ' : 'Incorrect. ') + explanationBody
+  }));
+  return { domain, type: 'single', question: questionText, options };
+}
+
+/* ---------- Percentage ---------- */
+function genPercentage(level = 2) {
+  const percentPool = level <= 1
+    ? [5, 10, 15, 20, 25, 50, 75, 80]
+    : [5, 10, 12, 15, 18, 20, 24, 25, 30, 35, 40, 45, 55, 60, 65, 70, 75, 85, 90];
+  const pct = percentPool[randInt(0, percentPool.length - 1)];
+  const pattern = randInt(1, 3);
+  let domain, question, correctVal, explanation, suffix = '';
+
+  if (pattern === 1) {
+    domain = 'Percent of a Number';
+    const base = level <= 1 ? randInt(2, 20) * 10 : randInt(20, 400);
+    correctVal = Math.round(((pct / 100) * base) * 100) / 100;
+    question = `What is ${pct}% of ${base}?`;
+    explanation = `${pct}% of ${base} = (${pct}/100) x ${base} = ${fmt(correctVal)}.`;
+  } else if (pattern === 2) {
+    domain = 'Finding the Percentage';
+    const whole = level <= 1 ? randInt(2, 20) * 10 : randInt(20, 500);
+    const part = Math.round(whole * pct / 100);
+    correctVal = Math.round((part / whole) * 10000) / 100;
+    question = `${part} is what percent of ${whole}?`;
+    explanation = `(${part}/${whole}) x 100 = ${fmt(correctVal)}%.`;
+    suffix = '%';
+  } else {
+    domain = 'Finding the Whole';
+    const denom = 100 / gcd(pct, 100);
+    const lo = 20, hi = level <= 1 ? 200 : 500;
+    const minMult = Math.max(1, Math.ceil(lo / denom));
+    const maxMult = Math.max(minMult, Math.floor(hi / denom));
+    const mult = randInt(minMult, maxMult);
+    const whole = mult * denom;
+    const part = (whole * pct) / 100;
+    correctVal = whole;
+    question = `${pct}% of a number is ${fmt(part)}. What is the number?`;
+    explanation = `If ${pct}% of the number is ${fmt(part)}, the number = ${fmt(part)} / (${pct}/100) = ${fmt(whole)}.`;
+  }
+
+  const primary = [correctVal + 10, correctVal - 10, correctVal * 2, Math.round(correctVal / 2), correctVal + pct, correctVal - pct];
+  const distractors = ensureNumericDistractors(correctVal, primary, 3, spreadFallback(correctVal, 0.2, suffix === '%')).map(d => d + suffix);
+  return buildSingleQuestion(domain, question, fmt(correctVal) + suffix, distractors, explanation);
+}
+
+/* ---------- Ratio ---------- */
+function genRatio(typeKey, level = 2) {
+  const isBig = typeKey === 'big';
+  const pattern = randInt(1, 3);
+  let domain, question, correctText, explanation, distractors;
+
+  if (pattern === 1) {
+    domain = 'Simplifying Ratios';
+    const factor = isBig ? randInt(3, 12) : randInt(2, 6);
+    let a, b, guard = 0;
+    do { a = randInt(2, isBig ? 40 : 12); b = randInt(2, isBig ? 40 : 12); guard++; } while (gcd(a, b) !== 1 && guard < 30);
+    const A = a * factor, B = b * factor;
+    question = `Simplify the ratio ${A}:${B} to its simplest form.`;
+    correctText = `${a}:${b}`;
+    explanation = `The greatest common factor of ${A} and ${B} is ${factor}. ${A}/${factor} : ${B}/${factor} = ${a}:${b}.`;
+    const cands = [`${b}:${a}`, `${a + 1}:${b}`, `${a}:${b + 1}`, `${a - 1 > 0 ? a - 1 : a + 2}:${b}`, `${a}:${b - 1 > 0 ? b - 1 : b + 2}`];
+    distractors = [];
+    const seen = new Set([correctText]);
+    for (const c of cands) { if (!seen.has(c)) { seen.add(c); distractors.push(c); } if (distractors.length >= 3) break; }
+    while (distractors.length < 3) { const filler = `${a}:${b + distractors.length + 2}`; if (!seen.has(filler)) { seen.add(filler); distractors.push(filler); } }
+  } else if (pattern === 2) {
+    domain = 'Equivalent Ratios';
+    const a = randInt(2, isBig ? 20 : 9);
+    const b = randInt(2, isBig ? 20 : 9);
+    const k = isBig ? randInt(4, 20) : randInt(2, 6);
+    const C = a * k, D = b * k;
+    question = `${a}:${b} = ${C}:?  What is the missing value?`;
+    correctText = `${D}`;
+    explanation = `${a}:${b} scaled by ${k} (since ${a} x ${k} = ${C}) gives ${b} x ${k} = ${D}.`;
+    distractors = ensureNumericDistractors(D, [D + b, D - b, D + k, D - k, b * (k + 1), b * (k - 1)], 3, spreadFallback(D, 0.2, false));
+  } else {
+    domain = 'Dividing in a Ratio';
+    const a = randInt(2, isBig ? 15 : 6);
+    const b = randInt(2, isBig ? 15 : 6);
+    const unit = isBig ? randInt(5, 40) : randInt(2, 10);
+    const total = (a + b) * unit;
+    const larger = Math.max(a, b) * unit;
+    question = `Divide ${total} in the ratio ${a}:${b}. What is the larger share?`;
+    correctText = `${larger}`;
+    explanation = `Total parts = ${a + b}. Each part = ${total}/${a + b} = ${unit}. Larger share = ${Math.max(a, b)} x ${unit} = ${larger}.`;
+    const smaller = Math.min(a, b) * unit;
+    distractors = ensureNumericDistractors(larger, [smaller, total, larger + unit, larger - unit], 3, spreadFallback(larger, 0.2, false));
+  }
+  return buildSingleQuestion(domain, question, correctText, distractors, explanation);
+}
+
+/* ---------- Multiplication ---------- */
+function genMultiplication(typeKey, level = 2) {
+  let a, b;
+  if (typeKey === '1x1_to_1x2') {
+    a = randInt(2, 9);
+    const use2 = level >= 2 ? Math.random() < 0.7 : Math.random() < 0.3;
+    b = use2 ? randInt(10, 99) : randInt(2, 9);
+  } else if (typeKey === '2x2_to_2x3') {
+    a = randInt(11, 99);
+    const use3 = level >= 2 ? Math.random() < 0.7 : Math.random() < 0.3;
+    b = use3 ? randInt(100, 999) : randInt(11, 99);
+  } else {
+    a = randInt(101, 999);
+    const use4 = level >= 2 ? Math.random() < 0.7 : Math.random() < 0.3;
+    b = use4 ? randInt(1000, 9999) : randInt(101, 999);
+  }
+  const correct = a * b;
+  const domain = 'Multiplication';
+  const question = `What is ${a} x ${b}?`;
+  const explanation = `${a} x ${b} = ${correct}.`;
+  const primary = [a * (b + 1), a * (b - 1), (a + 1) * b, (a - 1) * b, correct + a, correct - a, correct + b, correct - b];
+  const spread = correct > 10000 ? 0.02 : (correct > 500 ? 0.05 : 0.12);
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, spread, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+/* ---------- Division ---------- */
+function genDivision(typeKey, level = 2) {
+  let dividend, divisor, correctVal, question, explanation, domain;
+
+  if (typeKey === '2d_by_1d_whole') {
+    domain = 'Whole Number Division';
+    let q;
+    do {
+      divisor = randInt(2, 9);
+      q = randInt(level >= 3 ? 4 : 2, level >= 3 ? 12 : 9);
+      dividend = divisor * q;
+    } while (dividend < 10 || dividend > 99);
+    correctVal = q;
+    question = `What is ${dividend} \u00F7 ${divisor}?`;
+    explanation = `${dividend} \u00F7 ${divisor} = ${q}.`;
+  } else if (typeKey === '2d_by_1d_decimal') {
+    domain = 'Division with Decimals';
+    divisor = randInt(2, 9);
+    let guard = 0;
+    do { dividend = randInt(10, 99); guard++; } while (dividend % divisor === 0 && guard < 30);
+    correctVal = Math.round((dividend / divisor) * 100) / 100;
+    question = `What is ${dividend} \u00F7 ${divisor}? (Round to 2 decimal places.)`;
+    explanation = `${dividend} \u00F7 ${divisor} = ${correctVal.toFixed(2)} (rounded to 2 decimal places).`;
+  } else if (typeKey === '2d_by_2d_whole') {
+    domain = 'Whole Number Division';
+    const q = randInt(2, level >= 3 ? 9 : 7);
+    const maxDivisor = Math.min(99, Math.floor(99 / q));
+    divisor = randInt(10, Math.max(10, maxDivisor));
+    dividend = divisor * q;
+    correctVal = q;
+    question = `What is ${dividend} \u00F7 ${divisor}?`;
+    explanation = `${dividend} \u00F7 ${divisor} = ${q}.`;
+  } else {
+    domain = 'Division with Decimals';
+    let guard = 0;
+    do { dividend = randInt(10, 99); divisor = randInt(10, 99); guard++; } while ((dividend % divisor === 0 || divisor === dividend) && guard < 30);
+    correctVal = Math.round((dividend / divisor) * 100) / 100;
+    question = `What is ${dividend} \u00F7 ${divisor}? (Round to 2 decimal places.)`;
+    explanation = `${dividend} \u00F7 ${divisor} = ${correctVal.toFixed(2)} (rounded to 2 decimal places).`;
+  }
+
+  const isDecimalType = typeKey.includes('decimal');
+  const correctText = isDecimalType ? correctVal.toFixed(2) : fmt(correctVal);
+  const primary = isDecimalType
+    ? [correctVal + 0.5, correctVal - 0.5, correctVal + 1, correctVal - 1, correctVal + 0.1, correctVal - 0.1].map(v => Math.round(v * 100) / 100)
+    : [correctVal + 1, correctVal - 1, correctVal + 2, correctVal - 2, correctVal * 2];
+  const distractors = ensureNumericDistractors(correctVal, primary, 3, spreadFallback(correctVal, 0.2, isDecimalType)).map(d => isDecimalType ? parseFloat(d).toFixed(2) : d);
+  return buildSingleQuestion(domain, question, correctText, distractors, explanation);
+}
+
+/* ---------- Addition ---------- */
+function genAddition(typeKey, level = 2) {
+  let a, b, domain = 'Addition';
+  if (typeKey === '2d_by_2d') { a = randInt(10, 99); b = randInt(10, 99); }
+  else if (typeKey === '3d_by_3d') { a = randInt(100, 999); b = randInt(100, 999); }
+  else {
+    const pairs = [[4, 5], [5, 6], [6, 7]];
+    const idx = level >= 3 ? 2 : (level >= 1 ? randInt(0, 2) : 0);
+    const [d1, d2] = pairs[idx];
+    a = randDigits(d1); b = randDigits(d2);
+  }
+  const correct = a + b;
+  const question = `What is ${a} + ${b}?`;
+  const explanation = `${a} + ${b} = ${correct}.`;
+  const primary = [correct + 10, correct - 10, correct + 100, correct - 100, a - b, Math.abs(a - b), correct + 1, correct - 1];
+  const spread = correct > 100000 ? 0.01 : (correct > 1000 ? 0.03 : 0.1);
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, spread, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+/* ---------- Subtraction ---------- */
+function genSubtraction(typeKey, level = 2) {
+  let a, b, domain = 'Subtraction';
+  if (typeKey === '3d_positive') {
+    a = randInt(100, 999);
+    const use3 = Math.random() < 0.5;
+    b = use3 ? randInt(100, a - 1 > 100 ? a - 1 : 101) : randInt(10, Math.min(99, a - 1));
+    if (b >= a) b = randInt(10, Math.max(10, a - 1));
+  } else if (typeKey === '3d_negative') {
+    a = randInt(100, 600);
+    b = randInt(a + 1, 999);
+  } else {
+    const digits = level >= 3 ? 7 : (level >= 1 ? randInt(5, 7) : 5);
+    a = randDigits(digits); b = randDigits(digits);
+  }
+  const correct = a - b;
+  const question = `What is ${a} - ${b}?`;
+  const explanation = `${a} - ${b} = ${correct}.`;
+  const primary = [correct + 10, correct - 10, correct + 100, correct - 100, -correct, b - a, correct + 1, correct - 1];
+  const magnitude = Math.max(1, Math.abs(correct));
+  const spread = magnitude > 100000 ? 0.01 : (magnitude > 1000 ? 0.03 : 0.12);
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, spread, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+/* ---------- Algebra (1-variable) ---------- */
+function genAlgebra1(level = 2) {
+  const domain = 'Solving Linear Equations';
+  const a = randInt(2, level >= 3 ? 12 : 6);
+  const x = randInt(level >= 2 ? -12 : 1, 12);
+  const b = randInt(1, level >= 3 ? 30 : 15) * (Math.random() < 0.5 ? 1 : -1);
+  const c = a * x + b;
+  const bStr = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+  const question = `Solve for x: ${a}x ${bStr} = ${c}`;
+  const correct = x;
+  const explanation = `${a}x ${bStr} = ${c}  =>  ${a}x = ${c - b}  =>  x = ${fmt(x)}.`;
+  const primary = [x + 1, x - 1, x + a, x - a, -x, b];
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, 0.6, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+/* ---------- Algebra (2-variable) ---------- */
+function genAlgebra2(level = 2) {
+  const domain = 'Systems of Equations';
+  const x = randInt(level >= 2 ? -10 : 1, 10);
+  const y = randInt(level >= 2 ? -10 : 1, 10);
+  let a1 = randInt(1, 5), b1 = randInt(1, 5), a2 = randInt(1, 5), b2 = randInt(1, 5), guard = 0;
+  while (a1 * b2 - a2 * b1 === 0 && guard < 30) { a2 = randInt(1, 5); b2 = randInt(1, 5); guard++; }
+  const c1 = a1 * x + b1 * y;
+  const c2 = a2 * x + b2 * y;
+  const askX = Math.random() < 0.5;
+  const question = `If ${a1}x + ${b1}y = ${c1} and ${a2}x + ${b2}y = ${c2}, what is the value of ${askX ? 'x' : 'y'}?`;
+  const correct = askX ? x : y;
+  const other = askX ? y : x;
+  const explanation = `Solving the system gives x = ${fmt(x)} and y = ${fmt(y)}. So ${askX ? 'x' : 'y'} = ${fmt(correct)}.`;
+  const primary = [other, correct + 1, correct - 1, -correct, correct + 2, correct - 2];
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, 0.6, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+const GENERATORS = {
+  percentage: { regular: (lvl) => genPercentage(lvl) },
+  ratio: { small: (lvl) => genRatio('small', lvl), big: (lvl) => genRatio('big', lvl) },
+  multiplication: {
+    '1x1_to_1x2': (lvl) => genMultiplication('1x1_to_1x2', lvl),
+    '2x2_to_2x3': (lvl) => genMultiplication('2x2_to_2x3', lvl),
+    'long_3x3_to_3x4': (lvl) => genMultiplication('long_3x3_to_3x4', lvl)
+  },
+  division: {
+    '2d_by_1d_whole': (lvl) => genDivision('2d_by_1d_whole', lvl),
+    '2d_by_1d_decimal': (lvl) => genDivision('2d_by_1d_decimal', lvl),
+    '2d_by_2d_whole': (lvl) => genDivision('2d_by_2d_whole', lvl),
+    '2d_by_2d_decimal': (lvl) => genDivision('2d_by_2d_decimal', lvl)
+  },
+  addition: {
+    '2d_by_2d': (lvl) => genAddition('2d_by_2d', lvl),
+    '3d_by_3d': (lvl) => genAddition('3d_by_3d', lvl),
+    long_add: (lvl) => genAddition('long_add', lvl)
+  },
+  subtraction: {
+    '3d_positive': (lvl) => genSubtraction('3d_positive', lvl),
+    '3d_negative': (lvl) => genSubtraction('3d_negative', lvl),
+    long_sub: (lvl) => genSubtraction('long_sub', lvl)
+  },
+  algebra1: { find_values: (lvl) => genAlgebra1(lvl) },
+  algebra2: { find_values: (lvl) => genAlgebra2(lvl) }
+};
+
+function generateQuestion(topic, typeKey, level = 2) {
+  const topicGen = GENERATORS[topic];
+  if (!topicGen) return null;
+  const fn = topicGen[typeKey] || Object.values(topicGen)[0];
+  return fn(level);
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* =====================================================================
+   PRACTICE QUIZ ENGINE
+   ===================================================================== */
+const practice = {
+  topic: null, typeKey: null, total: 0, order: 'sequential', timerMinutes: 0,
+  questions: [], index: 0, score: 0, records: [], timerId: null, secondsLeft: 0, timedOut: false
+};
+
+function startPracticeQuiz(topic, typeKey, numQuestions, order, timerMinutes) {
+  practice.topic = topic; practice.typeKey = typeKey; practice.total = numQuestions;
+  practice.order = order; practice.timerMinutes = timerMinutes;
+  practice.questions = [];
+  for (let i = 0; i < numQuestions; i++) {
+    const level = order === 'sequential' ? Math.min(4, Math.floor((i / numQuestions) * 5)) : randInt(0, 4);
+    practice.questions.push(generateQuestion(topic, typeKey, level));
+  }
+  practice.index = 0; practice.score = 0; practice.records = []; practice.timedOut = false;
+
+  document.getElementById('setupRow').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  document.getElementById('resultsScreen').classList.add('hidden');
+
+  const badge = document.getElementById('topicBadge');
+  if (badge) badge.textContent = TOPIC_LABELS[topic] || topic;
+
+  clearInterval(practice.timerId);
+  const timerTag = document.getElementById('timerTag');
+  if (timerMinutes > 0) {
+    practice.secondsLeft = timerMinutes * 60;
+    timerTag.classList.remove('hidden');
+    updateTimerDisplay();
+    practice.timerId = setInterval(() => {
+      practice.secondsLeft--;
+      updateTimerDisplay();
+      if (practice.secondsLeft <= 0) {
+        clearInterval(practice.timerId);
+        practice.timedOut = true;
+        finishPracticeQuiz();
+      }
+    }, 1000);
+  } else {
+    timerTag.classList.add('hidden');
+  }
+
+  renderPracticeQuestion();
+}
+
+function updateTimerDisplay() {
+  const tag = document.getElementById('timerTag');
+  const m = Math.floor(Math.max(0, practice.secondsLeft) / 60);
+  const s = Math.max(0, practice.secondsLeft) % 60;
+  tag.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  tag.classList.toggle('timer-warning', practice.secondsLeft <= 60);
+}
+
+function renderPracticeQuestion() {
+  const q = practice.questions[practice.index];
+  document.getElementById('progressText').textContent = `Question ${practice.index + 1} of ${practice.total}`;
+  document.getElementById('progressFill').style.width = `${(practice.index / practice.total) * 100}%`;
+  document.getElementById('domainTag').textContent = q.domain;
+  document.getElementById('typeTag').textContent = 'Single Answer';
+  document.getElementById('questionText').textContent = q.question;
+  document.getElementById('selectionHint').textContent = '';
+  document.getElementById('resultBanner').className = 'result-banner hidden';
+
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  q.options.forEach(opt => {
+    const label = document.createElement('label');
+    label.className = 'option';
+    label.innerHTML = `<input type="radio" name="practiceOption" value="${opt.letter}"><span><span class="opt-letter">${opt.letter}.</span> ${escapeHtml(opt.text)}</span>`;
+    container.appendChild(label);
+    const explDiv = document.createElement('div');
+    explDiv.className = 'explanation-box';
+    explDiv.id = `expl-${opt.letter}`;
+    explDiv.textContent = opt.explanation;
+    container.appendChild(explDiv);
+  });
+
+  document.getElementById('checkBtn').classList.remove('hidden');
+  document.getElementById('nextBtn').classList.add('hidden');
+}
+
+function checkAnswer() {
+  const selected = document.querySelector('input[name="practiceOption"]:checked');
+  if (!selected) {
+    document.getElementById('selectionHint').textContent = 'Please select an answer before checking.';
+    return;
+  }
+  document.getElementById('selectionHint').textContent = '';
+  const q = practice.questions[practice.index];
+  const selLetter = selected.value;
+  const selOpt = q.options.find(o => o.letter === selLetter);
+  const correctOpt = q.options.find(o => o.correct);
+  const isCorrect = selOpt.correct;
+
+  document.querySelectorAll('input[name="practiceOption"]').forEach(inp => {
+    inp.disabled = true;
+    const optDiv = inp.closest('.option');
+    const letter = inp.value;
+    const optData = q.options.find(o => o.letter === letter);
+    if (optData.correct) optDiv.classList.add('correct-ans');
+    else if (letter === selLetter) optDiv.classList.add('wrong-ans');
+    const explDiv = document.getElementById(`expl-${letter}`);
+    explDiv.classList.add('show', optData.correct ? 'exp-correct' : 'exp-wrong');
+  });
+
+  const banner = document.getElementById('resultBanner');
+  banner.classList.remove('hidden');
+  if (isCorrect) {
+    banner.className = 'result-banner correct';
+    banner.textContent = 'Correct! Well done.';
+    practice.score++;
+  } else {
+    banner.className = 'result-banner incorrect';
+    banner.textContent = `Incorrect. The correct answer is ${correctOpt.letter}. ${correctOpt.text}`;
+  }
+
+  practice.records.push({
+    question: q.question, isCorrect, skipped: false,
+    yourAnswer: `${selOpt.letter}. ${selOpt.text}`,
+    correctAnswer: `${correctOpt.letter}. ${correctOpt.text}`
+  });
+
+  document.getElementById('checkBtn').classList.add('hidden');
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.classList.remove('hidden');
+  nextBtn.textContent = practice.index === practice.total - 1 ? 'See Results \u2192' : 'Next Question \u2192';
+}
+
+function nextPracticeQuestion() {
+  practice.index++;
+  if (practice.index >= practice.total) {
+    clearInterval(practice.timerId);
+    finishPracticeQuiz();
+  } else {
+    renderPracticeQuestion();
+  }
+}
+
+function finishPracticeQuiz() {
+  clearInterval(practice.timerId);
+  if (practice.timedOut) {
+    for (let i = practice.records.length; i < practice.total; i++) {
+      const q = practice.questions[i];
+      const correctOpt = q.options.find(o => o.correct);
+      practice.records.push({
+        question: q.question, isCorrect: false, skipped: true,
+        yourAnswer: '(no answer \u2014 time ran out)',
+        correctAnswer: `${correctOpt.letter}. ${correctOpt.text}`
+      });
+    }
+  }
+  renderPracticeResults();
+}
+
+function renderPracticeResults() {
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultsScreen').classList.remove('hidden');
+  const pct = Math.round((practice.score / practice.total) * 100);
+  document.getElementById('scoreCircle').textContent = `${pct}%`;
+  document.getElementById('scoreText').textContent = `You scored ${practice.score} out of ${practice.total}.`;
+  const timeUpNote = document.getElementById('timeUpNote');
+  if (practice.timedOut) {
+    timeUpNote.textContent = "Time's up! Unanswered questions were marked as skipped.";
+    timeUpNote.classList.remove('hidden');
+  } else {
+    timeUpNote.classList.add('hidden');
+  }
+  const body = document.getElementById('summaryBody');
+  body.innerHTML = '';
+  practice.records.forEach((r, idx) => {
+    const tr = document.createElement('tr');
+    const resultLabel = r.skipped ? '<span class="pill-skipped">Skipped</span>' : (r.isCorrect ? '<span class="pill-correct">Correct</span>' : '<span class="pill-wrong">Wrong</span>');
+    tr.innerHTML = `<td>${idx + 1}</td><td class="review-q">${escapeHtml(r.question)}</td><td>${resultLabel}</td><td>${escapeHtml(r.yourAnswer)}</td><td>${escapeHtml(r.correctAnswer)}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+/* =====================================================================
+   ENDLESS MODE ENGINE
+   ===================================================================== */
+let highScore = 0; // session-only (kept in memory, not persisted between page loads)
+
+const endless = { topic: null, typeKey: null, level: 0, score: 0, total: 0, current: null };
+
+function startEndlessMode(topic, typeKey) {
+  endless.topic = topic; endless.typeKey = typeKey; endless.level = 0; endless.score = 0; endless.total = 0;
+  document.getElementById('setupRow').classList.add('hidden');
+  document.getElementById('endlessScreen').classList.remove('hidden');
+  document.getElementById('endlessResultsScreen').classList.add('hidden');
+  document.getElementById('endlessHighScoreText').textContent = `Highest Score: ${highScore}`;
+  const badge = document.getElementById('topicBadge');
+  if (badge) badge.textContent = TOPIC_LABELS[topic] || topic;
+  updateEndlessSidebar();
+  nextEndlessQuestion();
+}
+
+function nextEndlessQuestion() {
+  endless.current = generateQuestion(endless.topic, endless.typeKey, endless.level);
+  document.getElementById('endlessProgressText').textContent = `Question ${endless.total + 1}`;
+  document.getElementById('endlessDomainTag').textContent = endless.current.domain;
+  document.getElementById('endlessDifficultyTag').textContent = LEVEL_LABELS[endless.level];
+  document.getElementById('endlessQuestionText').textContent = endless.current.question;
+  document.getElementById('endlessResultBanner').className = 'result-banner hidden';
+
+  const container = document.getElementById('endlessOptionsContainer');
+  container.innerHTML = '';
+  endless.current.options.forEach(opt => {
+    const label = document.createElement('label');
+    label.className = 'option';
+    label.innerHTML = `<input type="radio" name="endlessOption" value="${opt.letter}"><span><span class="opt-letter">${opt.letter}.</span> ${escapeHtml(opt.text)}</span>`;
+    container.appendChild(label);
+    const explDiv = document.createElement('div');
+    explDiv.className = 'explanation-box';
+    explDiv.id = `endless-expl-${opt.letter}`;
+    explDiv.textContent = opt.explanation;
+    container.appendChild(explDiv);
+  });
+
+  const checkBtn = document.getElementById('endlessCheckBtn');
+  checkBtn.classList.remove('hidden');
+  checkBtn.disabled = true;
+  document.getElementById('endlessNextBtn').classList.add('hidden');
+  updateDiffLadder();
+}
+
+function checkEndlessAnswer() {
+  const selected = document.querySelector('input[name="endlessOption"]:checked');
+  if (!selected) return;
+  const q = endless.current;
+  const selLetter = selected.value;
+  const selOpt = q.options.find(o => o.letter === selLetter);
+  const correctOpt = q.options.find(o => o.correct);
+  const isCorrect = selOpt.correct;
+
+  document.querySelectorAll('input[name="endlessOption"]').forEach(inp => {
+    inp.disabled = true;
+    const optDiv = inp.closest('.option');
+    const letter = inp.value;
+    const optData = q.options.find(o => o.letter === letter);
+    if (optData.correct) optDiv.classList.add('correct-ans');
+    else if (letter === selLetter) optDiv.classList.add('wrong-ans');
+    const explDiv = document.getElementById(`endless-expl-${letter}`);
+    explDiv.classList.add('show', optData.correct ? 'exp-correct' : 'exp-wrong');
+  });
+
+  const banner = document.getElementById('endlessResultBanner');
+  banner.classList.remove('hidden');
+  endless.total++;
+  if (isCorrect) {
+    endless.score++;
+    banner.className = 'result-banner correct';
+    banner.textContent = endless.level < 4 ? 'Correct! Difficulty increasing.' : 'Correct! You\u2019re at the top difficulty.';
+    endless.level = Math.min(4, endless.level + 1);
+  } else {
+    banner.className = 'result-banner incorrect';
+    banner.textContent = `Incorrect. The correct answer is ${correctOpt.letter}. ${correctOpt.text}`;
+    endless.level = Math.max(0, endless.level - 1);
+  }
+  updateEndlessSidebar();
+  document.getElementById('endlessCheckBtn').classList.add('hidden');
+  document.getElementById('endlessNextBtn').classList.remove('hidden');
+}
+
+function updateEndlessSidebar() {
+  document.getElementById('endlessScoreVal').textContent = endless.score;
+  document.getElementById('endlessTotalVal').textContent = endless.total;
+  document.getElementById('endlessSidebarHighVal').textContent = Math.max(highScore, endless.score);
+  updateDiffLadder();
+}
+
+function updateDiffLadder() {
+  document.querySelectorAll('.diff-step').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.level, 10) === endless.level);
+  });
+}
+
+function endEndlessMode() {
+  if (endless.score > highScore) highScore = endless.score;
+  document.getElementById('endlessScreen').classList.add('hidden');
+  document.getElementById('endlessResultsScreen').classList.remove('hidden');
+  document.getElementById('endlessScoreCircle').textContent = endless.score;
+  document.getElementById('endlessScoreText').textContent = `You answered ${endless.total} question${endless.total === 1 ? '' : 's'} and scored ${endless.score}.`;
+  const note = document.getElementById('endlessHighScoreNote');
+  note.textContent = (endless.score > 0 && endless.score >= highScore) ? 'New high score!' : `Highest score this session: ${highScore}`;
+  document.getElementById('endlessHighScoreText').textContent = `Highest Score: ${highScore}`;
+}
+
+/* =====================================================================
+   WIRE UP EVENTS
+   ===================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  const topicSelect = document.getElementById('topicSelect');
+  const topicTypeSelect = document.getElementById('topicTypeSelect');
+  const endlessTopicSelect = document.getElementById('endlessTopicSelect');
+  const endlessTopicTypeSelect = document.getElementById('endlessTopicTypeSelect');
+
+  populateTopicType(topicTypeSelect, topicSelect.value);
+  populateTopicType(endlessTopicTypeSelect, endlessTopicSelect.value);
+
+  topicSelect.addEventListener('change', (e) => {
+    populateTopicType(topicTypeSelect, e.target.value);
+    document.getElementById('topicBadge').textContent = TOPIC_LABELS[e.target.value] || e.target.value;
+  });
+
+  endlessTopicSelect.addEventListener('change', (e) => {
+    populateTopicType(endlessTopicTypeSelect, e.target.value);
+  });
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    const topic = topicSelect.value;
+    const typeKey = topicTypeSelect.value;
+    const num = parseInt(document.getElementById('numQuestions').value, 10);
+    const order = document.getElementById('qOrder').value;
+    const timerMin = parseInt(document.getElementById('timerSelect').value, 10);
+    startPracticeQuiz(topic, typeKey, num, order, timerMin);
+  });
+
+  document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+  document.getElementById('nextBtn').addEventListener('click', nextPracticeQuestion);
+  document.getElementById('restartBtn').addEventListener('click', () => {
+    document.getElementById('resultsScreen').classList.add('hidden');
+    document.getElementById('setupRow').classList.remove('hidden');
+  });
+
+  document.getElementById('startEndlessBtn').addEventListener('click', () => {
+    startEndlessMode(endlessTopicSelect.value, endlessTopicTypeSelect.value);
+  });
+  document.getElementById('endlessCheckBtn').addEventListener('click', checkEndlessAnswer);
+  document.getElementById('endlessNextBtn').addEventListener('click', nextEndlessQuestion);
+  document.getElementById('endEndlessBtn').addEventListener('click', endEndlessMode);
+  document.getElementById('endlessRestartBtn').addEventListener('click', () => {
+    document.getElementById('endlessResultsScreen').classList.add('hidden');
+    document.getElementById('setupRow').classList.remove('hidden');
+  });
+  document.getElementById('endlessOptionsContainer').addEventListener('change', (e) => {
+    if (e.target.name === 'endlessOption') document.getElementById('endlessCheckBtn').disabled = false;
+  });
+});
+</script>
+</body>
+</html>
