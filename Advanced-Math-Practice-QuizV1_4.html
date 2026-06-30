@@ -1,0 +1,1775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Math Practice Quiz</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  :root{
+    --orange:#FF9900; --dark:#232F3E; --dark2:#131A22; --green:#1D8102; --red:#D13212;
+    --gray:#f2f3f3; --border:#d5dbdb;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:"Amazon Ember","Helvetica Neue",Arial,sans-serif;
+    background:var(--gray); margin:0; padding:0; color:#16191f;
+  }
+  header{
+    background:var(--dark); color:#fff; padding:18px 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  header h1{margin:0; font-size:20px; font-weight:600;}
+  header .badge{background:var(--orange); color:#16191f; font-weight:700; padding:4px 10px; border-radius:4px; font-size:13px;}
+  .container{max-width:880px; margin:24px auto; padding:0 16px;}
+  .card{background:#fff; border:1px solid var(--border); border-radius:8px; padding:24px; margin-bottom:20px; box-shadow:0 1px 2px rgba(0,0,0,.05);}
+  .setup-grid{display:flex; gap:20px; flex-wrap:wrap; margin-top:10px;}
+  .field{flex:1; min-width:220px;}
+  .field label{display:block; font-weight:600; margin-bottom:6px; font-size:14px;}
+  select{
+    width:100%; padding:10px; border:1px solid var(--border); border-radius:4px; font-size:14px; background:#fff;
+  }
+  .btn{
+    background:var(--orange); color:#16191f; border:none; padding:12px 22px; font-size:15px; font-weight:700;
+    border-radius:4px; cursor:pointer; margin-top:18px;
+  }
+  .btn:hover{background:#e88b00;}
+  .btn.secondary{background:#fff; border:1px solid var(--dark); color:var(--dark);}
+  .btn.secondary:hover{background:#eee;}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+  .progress-bar{height:8px; background:#e7e9e9; border-radius:4px; overflow:hidden; margin-bottom:14px;}
+  .progress-fill{height:100%; background:var(--orange); width:0%; transition:width .3s;}
+  .meta-row{display:flex; justify-content:space-between; font-size:13px; color:#545b64; margin-bottom:10px; flex-wrap:wrap; gap:6px;}
+  .domain-tag{background:var(--dark); color:#fff; padding:2px 10px; border-radius:12px; font-size:12px;}
+  .q-type-tag{background:#eaeded; color:#16191f; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:600;}
+  .timer-tag{background:#eaeded; color:#16191f; padding:2px 10px; border-radius:12px; font-size:12px; font-weight:700; font-variant-numeric:tabular-nums;}
+  .timer-tag.timer-warning{background:#fdf0ee; color:var(--red);}
+  .question-text{font-size:17px; font-weight:600; margin:10px 0 18px; line-height:1.4; white-space:pre-line;}
+  .option{
+    display:flex; align-items:flex-start; gap:10px; border:1px solid var(--border); border-radius:6px;
+    padding:12px 14px; margin-bottom:10px; cursor:pointer; background:#fff; transition:background .15s;
+  }
+  .option:hover{background:#f8f8f8;}
+  .option input{margin-top:3px; flex-shrink:0;}
+  .option .opt-letter{font-weight:700; margin-right:4px;}
+  .option.correct-ans{border-color:var(--green); background:#f0fbef;}
+  .option.wrong-ans{border-color:var(--red); background:#fdf0ee;}
+  .explanation-box{
+    margin-top:6px; margin-bottom:10px; padding:10px 12px; border-radius:6px; font-size:13.5px; line-height:1.5;
+    border-left:4px solid var(--border); background:#fafafa; display:none;
+  }
+  .explanation-box.show{display:block;}
+  .explanation-box.exp-correct{border-left-color:var(--green); background:#f0fbef;}
+  .explanation-box.exp-wrong{border-left-color:var(--red); background:#fdf0ee;}
+  .result-banner{
+    padding:14px 16px; border-radius:6px; font-weight:700; margin-bottom:16px; font-size:15px;
+  }
+  .result-banner.correct{background:#f0fbef; color:var(--green); border:1px solid var(--green);}
+  .result-banner.incorrect{background:#fdf0ee; color:var(--red); border:1px solid var(--red);}
+  .result-banner.timeup{background:#fdf6ee; color:#8a5a00; border:1px solid var(--orange);}
+  .nav-row{display:flex; justify-content:space-between; margin-top:18px; gap:10px; flex-wrap:wrap;}
+  .summary-table{width:100%; border-collapse:collapse; margin-top:14px; font-size:14px; table-layout:fixed;}
+  .summary-table th, .summary-table td{border:1px solid var(--border); padding:8px 10px; text-align:left; vertical-align:top; word-wrap:break-word; overflow-wrap:break-word;}
+  .summary-table th{background:var(--dark); color:#fff;}
+  .summary-table th:nth-child(1), .summary-table td:nth-child(1){width:30px;}
+  .summary-table th:nth-child(2), .summary-table td:nth-child(2){width:30%;}
+  .summary-table th:nth-child(3), .summary-table td:nth-child(3){width:80px;}
+  .summary-table th:nth-child(4), .summary-table td:nth-child(4){width:80px;}
+  .summary-table th:nth-child(5), .summary-table td:nth-child(5){width:auto;}
+  .score-circle{
+    width:140px; height:140px; border-radius:50%; border:10px solid var(--orange); display:flex; align-items:center;
+    justify-content:center; font-size:30px; font-weight:700; margin:10px auto; color:var(--dark);
+  }
+  .center{text-align:center;}
+  .hidden{display:none !important;}
+  .footer-note{font-size:12px; color:#878787; text-align:center; margin:30px 0 10px;}
+  .review-q{font-weight:700; margin-bottom:6px;}
+  .pill-correct{color:var(--green); font-weight:700;}
+  .pill-wrong{color:var(--red); font-weight:700;}
+  .pill-skipped{color:#8a5a00; font-weight:700;}
+
+  /* --- Endless Mode additions --- */
+  .setup-row{display:flex; gap:20px; flex-wrap:wrap; align-items:flex-start;}
+  .setup-card{flex:1; min-width:300px; margin-bottom:0;}
+  .endless-setup-card{border-top:4px solid var(--orange);}
+  .endless-start-row{display:flex; align-items:center; gap:16px; margin-top:18px; flex-wrap:wrap;}
+  .endless-start-row .btn{margin-top:0;}
+  #endlessHighScoreText{font-weight:700; font-size:14px; color:var(--dark);}
+  .end-endless-btn{background:#fff; border:1px solid var(--red); color:var(--red); margin-top:0;}
+  .end-endless-btn:hover{background:#fdf0ee;}
+  .mania-setup-card{border-top:4px solid var(--red);}
+  .mania-warning{font-size:13px; color:#8a5a00; background:#fdf6ee; border:1px solid var(--orange); border-radius:6px; padding:10px 12px; margin:10px 0 16px; line-height:1.5;}
+  .endless-layout{display:flex; gap:24px; flex-wrap:wrap;}
+  .endless-main{flex:3; min-width:280px;}
+  .difficulty-sidebar{flex:1; min-width:170px; background:var(--gray); border:1px solid var(--border); border-radius:8px; padding:16px;}
+  .difficulty-sidebar h3{margin:0 0 10px; font-size:15px;}
+  .diff-ladder{display:flex; flex-direction:column; gap:6px; margin-bottom:18px;}
+  .diff-step{padding:9px 10px; border-radius:6px; font-size:13px; font-weight:700; text-align:center; background:#fff; border:1px solid var(--border); color:#8a8f94; transition:background .2s, color .2s, border-color .2s, transform .2s;}
+  .diff-step.active{transform:scale(1.05); box-shadow:0 1px 3px rgba(0,0,0,.15);}
+  .endless-stats{display:flex; flex-direction:column; gap:10px;}
+  .stat-box{background:#fff; border:1px solid var(--border); border-radius:6px; padding:10px; text-align:center;}
+  .stat-label{display:block; font-size:11px; color:#545b64; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;}
+  .stat-value{display:block; font-size:22px; font-weight:700; color:var(--dark);}
+  .mania-mode-tag{background:var(--red);color:#fff;padding:2px 10px;border-radius:12px;font-size:12px;font-weight:700;}
+  .option.multi-pending{border-color:var(--orange);background:#fdf6ee;}
+  @media (max-width:600px){
+    .setup-card{min-width:100%;}
+  }
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1 id="pageTitle">Math Practice Quiz</h1>
+  <span class="badge" id="topicBadge">Beginner Math</span>
+</header>
+
+<div class="container">
+
+  <!-- SETUP SCREENS -->
+  <div class="setup-row" id="setupRow">
+  <div class="card setup-card" id="setupScreen">
+    <h2>Set up your practice quiz</h2>
+    <p style="color:#545b64; font-size:14px;" id="setupDesc">Choose a topic and topic type, how many questions, the order, and an optional timer, then start. Every question is generated fresh, so you'll never run out of practice.</p>
+    <div class="setup-grid">
+      <div class="field">
+        <label for="topicSelect">Topic</label>
+        <select id="topicSelect">
+          <option value="percentage" selected>Percentage</option>
+          <option value="ratio">Ratio</option>
+          <option value="multiplication">Multiplication</option>
+          <option value="division">Division</option>
+          <option value="addition">Addition</option>
+          <option value="subtraction">Subtraction</option>
+          <option value="algebra1">1-Variable Algebra</option>
+          <option value="algebra2">2-Variable Algebra</option>
+          <option value="geometry">Geometry</option>
+        </select>
+      </div>
+
+      <!-- New Topic Type dropdown placed next to Topic -->
+      <div class="field">
+        <label for="topicTypeSelect">Topic Type</label>
+        <select id="topicTypeSelect">
+          <!-- options populated dynamically -->
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="numQuestions">Number of Questions</label>
+        <select id="numQuestions">
+          <option value="10">10 Questions</option>
+          <option value="20">20 Questions</option>
+          <option value="30">30 Questions</option>
+          <option value="50">50 Questions</option>
+          <option value="100" selected>100 Questions</option>
+        </select>
+      </div>
+    </div>
+    <div class="setup-grid">
+      <div class="field">
+        <label for="qOrder">Question Order</label>
+        <select id="qOrder">
+          <option value="sequential">Sequential (gets harder as you go)</option>
+          <option value="random">Random (mixed difficulty)</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="timerSelect">Timer</label>
+        <select id="timerSelect">
+          <option value="0" selected>Unlimited (no timer)</option>
+          <option value="5">5 minutes</option>
+          <option value="10">10 minutes</option>
+          <option value="15">15 minutes</option>
+          <option value="20">20 minutes</option>
+          <option value="25">25 minutes</option>
+          <option value="30">30 minutes</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn" id="startBtn">Start Practice Quiz</button>
+  </div>
+
+  <div class="card setup-card endless-setup-card" id="endlessSetupScreen">
+    <h2>Endless Mode</h2>
+    <p style="color:#545b64; font-size:14px;">Adaptive difficulty &mdash; get one right and the next question gets harder, get one wrong and it eases off. No question limit, no timer. See how high you can climb.</p>
+    <div class="field">
+      <label for="endlessTopicSelect">Topic</label>
+      <select id="endlessTopicSelect">
+        <option value="percentage" selected>Percentage</option>
+        <option value="ratio">Ratio</option>
+        <option value="multiplication">Multiplication</option>
+        <option value="division">Division</option>
+        <option value="addition">Addition</option>
+        <option value="subtraction">Subtraction</option>
+        <option value="algebra1">1-Variable Algebra</option>
+        <option value="algebra2">2-Variable Algebra</option>
+        <option value="geometry">Geometry</option>
+      </select>
+    </div>
+
+    <!-- Topic Type for Endless Mode -->
+    <div class="field" style="margin-top:10px;">
+      <label for="endlessTopicTypeSelect">Topic Type</label>
+      <select id="endlessTopicTypeSelect">
+        <!-- populated dynamically -->
+      </select>
+    </div>
+
+    <div class="endless-start-row">
+      <button class="btn" id="startEndlessBtn">Start Endless</button>
+      <span id="endlessHighScoreText">Highest Score: 0</span>
+    </div>
+  </div>
+
+  <div class="card setup-card mania-setup-card" id="maniaSetupScreen">
+    <h2>Mania Mode</h2>
+    <p class="mania-warning">&#9889; Every question is pulled at random from any topic (Geometry excluded for now) &mdash; and sometimes two topics get mixed into one question. Difficulty is locked to Hard the whole time. <strong>Not recommended for regular practice</strong> &mdash; this one's just for a fun challenge.</p>
+    <div class="field">
+      <label for="maniaNumQuestions">Number of Questions</label>
+      <select id="maniaNumQuestions">
+        <option value="25">25 Questions</option>
+        <option value="50" selected>50 Questions</option>
+        <option value="100">100 Questions</option>
+        <option value="150">150 Questions</option>
+        <option value="200">200 Questions</option>
+      </select>
+    </div>
+    <div class="endless-start-row">
+      <button class="btn" id="startManiaBtn">Start Mania</button>
+      <button class="btn secondary" id="startEndlessManiaBtn">Endless Mania</button>
+    </div>
+  </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div class="card hidden" id="quizScreen">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="meta-row">
+      <span id="progressText">Question 1 of 100</span>
+      <span><span class="domain-tag" id="domainTag">Topic</span> &nbsp; <span class="q-type-tag" id="typeTag">Single Answer</span> &nbsp; <span class="timer-tag hidden" id="timerTag">05:00</span></span>
+    </div>
+    <div class="question-text" id="questionText"></div>
+    <div id="questionMedia" style=""></div>
+    <div id="optionsContainer"></div>
+    <div id="selectionHint" style="font-size:13px;color:var(--red);min-height:16px;margin:-4px 0 8px;"></div>
+
+    <div id="resultBanner" class="result-banner hidden"></div>
+
+    <div class="nav-row">
+      <button class="btn secondary" id="checkBtn">Check Answer</button>
+      <button class="btn hidden" id="nextBtn">Next Question &rarr;</button>
+    </div>
+  </div>
+
+  <!-- ENDLESS MODE SCREEN -->
+  <div class="card hidden" id="endlessScreen">
+    <div class="endless-layout">
+      <div class="endless-main">
+        <div class="meta-row">
+          <span id="endlessProgressText">Question 1</span>
+          <span><span class="domain-tag" id="endlessDomainTag">Topic</span> &nbsp; <span class="q-type-tag" id="endlessDifficultyTag">Easy</span></span>
+        </div>
+        <div class="question-text" id="endlessQuestionText"></div>
+        <div id="endlessQuestionMedia" style=""></div>
+        <div id="endlessOptionsContainer"></div>
+        <div id="endlessResultBanner" class="result-banner hidden"></div>
+        <div class="nav-row">
+          <button class="btn secondary" id="endlessCheckBtn" disabled>Check Answer</button>
+          <button class="btn hidden" id="endlessNextBtn">Next Question &rarr;</button>
+        </div>
+        <div class="center" style="margin-top:14px;">
+          <button class="btn end-endless-btn" id="endEndlessBtn">End Endless Mode</button>
+        </div>
+      </div>
+      <div class="difficulty-sidebar">
+        <h3>Difficulty</h3>
+        <div class="diff-ladder" id="diffLadder">
+          <div class="diff-step" data-level="4">Extreme</div>
+          <div class="diff-step" data-level="3">Very Hard</div>
+          <div class="diff-step" data-level="2">Hard</div>
+          <div class="diff-step" data-level="1">Medium</div>
+          <div class="diff-step" data-level="0">Easy</div>
+        </div>
+        <div class="endless-stats">
+          <div class="stat-box"><span class="stat-label">Score</span><span class="stat-value" id="endlessScoreVal">0</span></div>
+          <div class="stat-box"><span class="stat-label">Total Questions</span><span class="stat-value" id="endlessTotalVal">0</span></div>
+          <div class="stat-box"><span class="stat-label">Highest Score</span><span class="stat-value" id="endlessSidebarHighVal">0</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENDLESS RESULTS SCREEN -->
+  <div class="card hidden" id="endlessResultsScreen">
+    <h2 class="center">Endless Mode Results</h2>
+    <div class="score-circle" id="endlessScoreCircle">0</div>
+    <p class="center" id="endlessScoreText" style="font-size:16px;"></p>
+    <p class="center" id="endlessHighScoreNote" style="font-size:14px; font-weight:700;"></p>
+    <div class="center">
+      <button class="btn" id="endlessRestartBtn">Back to Setup</button>
+    </div>
+  </div>
+
+  <!-- MANIA GAME SCREEN -->
+  <div class="card hidden" id="maniaScreen">
+    <div class="progress-bar"><div class="progress-fill" id="maniaProgressFill"></div></div>
+    <div class="meta-row">
+      <span id="maniaProgressText">Question 1</span>
+      <span>
+        <span class="domain-tag" id="maniaDomainTag">Topic</span>
+        &nbsp;<span class="q-type-tag mania-mode-tag">&#9889; MANIA</span>
+        &nbsp;<span id="maniaScoreTag" style="font-weight:700;font-size:13px;"></span>
+      </span>
+    </div>
+    <div class="question-text" id="maniaQuestionText"></div>
+    <div id="maniaQuestionMedia" style=""></div>
+    <div id="maniaOptionsContainer"></div>
+    <div id="maniaSelectionHint" style="font-size:13px;color:var(--red);min-height:16px;margin:-4px 0 8px;"></div>
+    <div id="maniaResultBanner" class="result-banner hidden"></div>
+    <div class="nav-row">
+      <button class="btn secondary" id="maniaCheckBtn">Check Answer</button>
+      <button class="btn hidden" id="maniaNextBtn">Next Question &rarr;</button>
+    </div>
+    <div class="center" style="margin-top:14px;">
+      <button class="btn end-endless-btn" id="endManiaBtn">End Mania Mode</button>
+    </div>
+  </div>
+
+  <!-- MANIA RESULTS SCREEN -->
+  <div class="card hidden" id="maniaResultsScreen">
+    <h2 class="center" style="color:var(--red);">&#9889; Mania Results</h2>
+    <div class="score-circle" id="maniaResultsCircle" style="border-color:var(--red);">0%</div>
+    <p class="center" id="maniaResultsText" style="font-size:16px;"></p>
+    <p class="center" id="maniaResultsHighScore" style="font-size:14px;font-weight:700;color:var(--red);"></p>
+    <div class="center">
+      <button class="btn" id="maniaRestartBtn">Back to Setup</button>
+    </div>
+    <h3>Review Sheet</h3>
+    <table class="summary-table">
+      <thead><tr><th>#</th><th>Question</th><th>Result</th><th>Your Answer</th><th>Correct Answer</th></tr></thead>
+      <tbody id="maniaSummaryBody"></tbody>
+    </table>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="card hidden" id="resultsScreen">
+    <h2 class="center">Practice Quiz Results</h2>
+    <div class="score-circle" id="scoreCircle">0%</div>
+    <p class="center" id="scoreText" style="font-size:16px;"></p>
+    <p class="center hidden" id="timeUpNote" style="font-size:13px;color:#8a5a00;"></p>
+    <div class="center">
+      <button class="btn" id="restartBtn">Start New Practice Quiz</button>
+    </div>
+    <h3>Review Sheet</h3>
+    <table class="summary-table">
+      <thead><tr><th>#</th><th>Question</th><th>Result</th><th>Your Answer</th><th>Correct Answer</th></tr></thead>
+      <tbody id="summaryBody"></tbody>
+    </table>
+  </div>
+
+  <div class="footer-note">Built for personal math practice &middot; Original practice content, not from any textbook or exam.</div>
+</div>
+
+<script>
+/* =====================================================================
+   TOPIC TYPES — sub-categories shown in the "Topic Type" dropdown
+   ===================================================================== */
+const TOPIC_TYPES = {
+  percentage: [
+    { value: 'regular', text: 'Regular' }
+  ],
+  ratio: [
+    { value: 'small', text: 'Small Ratios' },
+    { value: 'big', text: 'Big Ratios' }
+  ],
+  multiplication: [
+    { value: '1x1_to_1x2', text: '1 digit x 1 digit to 1 digit x 2 digit' },
+    { value: '2x2_to_2x3', text: '2 digit x 2 digit to 2 digit x 3 digit' },
+    { value: 'long_3x3_to_3x4', text: 'Long 3 digit by 3 digit to 3 digit by 4 digit' }
+  ],
+  division: [
+    { value: '2d_by_1d_whole', text: 'Regular 2 digit by 1 digit whole number' },
+    { value: '2d_by_1d_decimal', text: 'Regular 2 digit by 1 digit decimals' },
+    { value: '2d_by_2d_whole', text: 'Regular 2 digit by 2 digit whole number' },
+    { value: '2d_by_2d_decimal', text: 'Regular 2 digit by 2 digit decimal' }
+  ],
+  addition: [
+    { value: '2d_by_2d', text: '2 digit by 2 digit' },
+    { value: '3d_by_3d', text: '3 digit by 3 digit' },
+    { value: 'long_add', text: 'Long Addition (4digit + 5 digit to 6 digit + 7 digit)' }
+  ],
+  subtraction: [
+    { value: '3d_positive', text: '3 digit - (2 digits: 3 digits) Positive' },
+    { value: '3d_negative', text: '3 digit - (2 digits: 3 digits) Negative' },
+    { value: 'long_sub', text: 'Long (5 digit to 7 digit Negative and Positive)' }
+  ],
+  algebra1: [
+    { value: 'find_values', text: 'Finding values from equations' },
+    { value: 'evaluate', text: 'Given Variable Values: Evaluate' }
+  ],
+  algebra2: [
+    { value: 'find_values', text: 'Finding values from equations' },
+    { value: 'evaluate', text: 'Given Variable Values: Evaluate' }
+  ],
+  geometry: [
+    { value: 'triangle_angle', text: 'Angles of Triangles' },
+    { value: 'classify_angle', text: 'Classifying Angles' },
+    { value: 'classify_triangle_angle', text: 'Classifying Triangles by Angle' },
+    { value: 'classify_triangle_side', text: 'Classifying Triangles by Side' },
+    { value: 'identify_quad', text: 'Identifying Quadrilaterals' },
+    { value: 'quad_properties', text: 'Quadrilateral Properties' }
+  ]
+};
+
+const TOPIC_LABELS = {
+  percentage: 'Percentage', ratio: 'Ratio', multiplication: 'Multiplication', division: 'Division',
+  addition: 'Addition', subtraction: 'Subtraction', algebra1: '1-Variable Algebra', algebra2: '2-Variable Algebra',
+  geometry: 'Geometry', mania: 'Mania Mode'
+};
+
+const LEVEL_LABELS = ['Easy', 'Medium', 'Hard', 'Very Hard', 'Extreme'];
+
+function populateTopicType(selectElem, topicKey) {
+  if (!selectElem) return;
+  const types = TOPIC_TYPES[topicKey] || [{ value: 'regular', text: 'Regular' }];
+  selectElem.innerHTML = '';
+  types.forEach((t, idx) => {
+    const opt = document.createElement('option');
+    opt.value = t.value;
+    opt.textContent = t.text;
+    if (idx === 0) opt.selected = true;
+    selectElem.appendChild(opt);
+  });
+}
+
+/* =====================================================================
+   QUESTION GENERATORS — every question is produced fresh, on demand,
+   so practice is never limited to a fixed bank. Each generator returns:
+   { domain, type:'single', question, options:[{letter,text,correct,explanation}] }
+   ===================================================================== */
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function shuffleArr(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function fmt(n) {
+  if (typeof n !== 'number') return String(n);
+  if (Number.isInteger(n)) return n.toString();
+  return (Math.round(n * 100) / 100).toString();
+}
+
+function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); return b === 0 ? a : gcd(b, a % b); }
+
+function randDigits(n) {
+  const lo = Math.pow(10, n - 1);
+  const hi = Math.pow(10, n) - 1;
+  return randInt(lo, hi);
+}
+
+function ensureNumericDistractors(correct, primaryCandidates, count, fallbackGen) {
+  const seen = new Set([String(fmt(correct))]);
+  const out = [];
+  for (const c of primaryCandidates) {
+    const key = String(fmt(c));
+    if (!seen.has(key) && isFinite(c)) { seen.add(key); out.push(c); }
+    if (out.length >= count) return out.map(fmt);
+  }
+  let guard = 0;
+  while (out.length < count && guard < 100) {
+    guard++;
+    const c = fallbackGen();
+    const key = String(fmt(c));
+    if (!seen.has(key) && isFinite(c)) { seen.add(key); out.push(c); }
+  }
+  return out.map(fmt);
+}
+
+function spreadFallback(correct, spreadFrac, allowDecimal) {
+  return () => {
+    const magnitude = Math.max(1, Math.abs(correct));
+    let delta = Math.max(1, Math.round(magnitude * spreadFrac * (Math.random() * 0.8 + 0.4)));
+    const sign = Math.random() < 0.5 ? -1 : 1;
+    let val = correct + sign * delta;
+    if (!allowDecimal) val = Math.round(val);
+    else val = Math.round(val * 100) / 100;
+    if (val === correct) val += sign * (allowDecimal ? 0.5 : 1);
+    return val;
+  };
+}
+
+function buildSingleQuestion(domain, questionText, correctText, distractorTexts, explanationBody) {
+  const letters = ['A', 'B', 'C', 'D'];
+  const items = shuffleArr([
+    { text: correctText, correct: true },
+    ...distractorTexts.map(t => ({ text: t, correct: false }))
+  ]);
+  const options = items.map((it, idx) => ({
+    letter: letters[idx],
+    text: it.text,
+    correct: it.correct,
+    explanation: (it.correct ? 'Correct. ' : 'Incorrect. ') + explanationBody
+  }));
+  return { domain, type: 'single', question: questionText, options };
+}
+
+/* ---------- Percentage ---------- */
+function genPercentage(level = 2) {
+  const percentPool = level <= 1
+    ? [5, 10, 15, 20, 25, 50, 75, 80]
+    : [5, 10, 12, 15, 18, 20, 24, 25, 30, 35, 40, 45, 55, 60, 65, 70, 75, 85, 90];
+  const pct = percentPool[randInt(0, percentPool.length - 1)];
+  const pattern = randInt(1, 3);
+  let domain, question, correctVal, explanation, suffix = '';
+
+  if (pattern === 1) {
+    domain = 'Percent of a Number';
+    const base = level <= 1 ? randInt(2, 20) * 10 : randInt(20, 400);
+    correctVal = Math.round(((pct / 100) * base) * 100) / 100;
+    question = `What is ${pct}% of ${base}?`;
+    explanation = `${pct}% of ${base} = (${pct}/100) x ${base} = ${fmt(correctVal)}.`;
+  } else if (pattern === 2) {
+    domain = 'Finding the Percentage';
+    const whole = level <= 1 ? randInt(2, 20) * 10 : randInt(20, 500);
+    const part = Math.round(whole * pct / 100);
+    correctVal = Math.round((part / whole) * 10000) / 100;
+    question = `${part} is what percent of ${whole}?`;
+    explanation = `(${part}/${whole}) x 100 = ${fmt(correctVal)}%.`;
+    suffix = '%';
+  } else {
+    domain = 'Finding the Whole';
+    const denom = 100 / gcd(pct, 100);
+    const lo = 20, hi = level <= 1 ? 200 : 500;
+    const minMult = Math.max(1, Math.ceil(lo / denom));
+    const maxMult = Math.max(minMult, Math.floor(hi / denom));
+    const mult = randInt(minMult, maxMult);
+    const whole = mult * denom;
+    const part = (whole * pct) / 100;
+    correctVal = whole;
+    question = `${pct}% of a number is ${fmt(part)}. What is the number?`;
+    explanation = `If ${pct}% of the number is ${fmt(part)}, the number = ${fmt(part)} / (${pct}/100) = ${fmt(whole)}.`;
+  }
+
+  const primary = [correctVal + 10, correctVal - 10, correctVal * 2, Math.round(correctVal / 2), correctVal + pct, correctVal - pct];
+  const distractors = ensureNumericDistractors(correctVal, primary, 3, spreadFallback(correctVal, 0.2, suffix === '%')).map(d => d + suffix);
+  return buildSingleQuestion(domain, question, fmt(correctVal) + suffix, distractors, explanation);
+}
+
+/* ---------- Ratio ---------- */
+function genRatio(typeKey, level = 2) {
+  const isBig = typeKey === 'big';
+  const pattern = randInt(1, 3);
+  let domain, question, correctText, explanation, distractors;
+
+  if (pattern === 1) {
+    domain = 'Simplifying Ratios';
+    const factor = isBig ? randInt(3, 12) : randInt(2, 6);
+    let a, b, guard = 0;
+    do { a = randInt(2, isBig ? 40 : 12); b = randInt(2, isBig ? 40 : 12); guard++; } while (gcd(a, b) !== 1 && guard < 30);
+    const A = a * factor, B = b * factor;
+    question = `Simplify the ratio ${A}:${B} to its simplest form.`;
+    correctText = `${a}:${b}`;
+    explanation = `The greatest common factor of ${A} and ${B} is ${factor}. ${A}/${factor} : ${B}/${factor} = ${a}:${b}.`;
+    const cands = [`${b}:${a}`, `${a + 1}:${b}`, `${a}:${b + 1}`, `${a - 1 > 0 ? a - 1 : a + 2}:${b}`, `${a}:${b - 1 > 0 ? b - 1 : b + 2}`];
+    distractors = [];
+    const seen = new Set([correctText]);
+    for (const c of cands) { if (!seen.has(c)) { seen.add(c); distractors.push(c); } if (distractors.length >= 3) break; }
+    while (distractors.length < 3) { const filler = `${a}:${b + distractors.length + 2}`; if (!seen.has(filler)) { seen.add(filler); distractors.push(filler); } }
+  } else if (pattern === 2) {
+    domain = 'Equivalent Ratios';
+    const a = randInt(2, isBig ? 20 : 9);
+    const b = randInt(2, isBig ? 20 : 9);
+    const k = isBig ? randInt(4, 20) : randInt(2, 6);
+    const C = a * k, D = b * k;
+    question = `${a}:${b} = ${C}:?  What is the missing value?`;
+    correctText = `${D}`;
+    explanation = `${a}:${b} scaled by ${k} (since ${a} x ${k} = ${C}) gives ${b} x ${k} = ${D}.`;
+    distractors = ensureNumericDistractors(D, [D + b, D - b, D + k, D - k, b * (k + 1), b * (k - 1)], 3, spreadFallback(D, 0.2, false));
+  } else {
+    domain = 'Dividing in a Ratio';
+    const a = randInt(2, isBig ? 15 : 6);
+    const b = randInt(2, isBig ? 15 : 6);
+    const unit = isBig ? randInt(5, 40) : randInt(2, 10);
+    const total = (a + b) * unit;
+    const larger = Math.max(a, b) * unit;
+    question = `Divide ${total} in the ratio ${a}:${b}. What is the larger share?`;
+    correctText = `${larger}`;
+    explanation = `Total parts = ${a + b}. Each part = ${total}/${a + b} = ${unit}. Larger share = ${Math.max(a, b)} x ${unit} = ${larger}.`;
+    const smaller = Math.min(a, b) * unit;
+    distractors = ensureNumericDistractors(larger, [smaller, total, larger + unit, larger - unit], 3, spreadFallback(larger, 0.2, false));
+  }
+  return buildSingleQuestion(domain, question, correctText, distractors, explanation);
+}
+
+/* ---------- Multiplication ---------- */
+function genMultiplication(typeKey, level = 2) {
+  let a, b;
+  if (typeKey === '1x1_to_1x2') {
+    a = randInt(2, 9);
+    const use2 = level >= 2 ? Math.random() < 0.7 : Math.random() < 0.3;
+    b = use2 ? randInt(10, 99) : randInt(2, 9);
+  } else if (typeKey === '2x2_to_2x3') {
+    a = randInt(11, 99);
+    const use3 = level >= 2 ? Math.random() < 0.7 : Math.random() < 0.3;
+    b = use3 ? randInt(100, 999) : randInt(11, 99);
+  } else {
+    a = randInt(101, 999);
+    const use4 = level >= 2 ? Math.random() < 0.7 : Math.random() < 0.3;
+    b = use4 ? randInt(1000, 9999) : randInt(101, 999);
+  }
+  const correct = a * b;
+  const domain = 'Multiplication';
+  const question = `What is ${a} x ${b}?`;
+  const explanation = `${a} x ${b} = ${correct}.`;
+  const primary = [a * (b + 1), a * (b - 1), (a + 1) * b, (a - 1) * b, correct + a, correct - a, correct + b, correct - b];
+  const spread = correct > 10000 ? 0.02 : (correct > 500 ? 0.05 : 0.12);
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, spread, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+/* ---------- Division ---------- */
+function genDivision(typeKey, level = 2) {
+  let dividend, divisor, correctVal, question, explanation, domain;
+
+  if (typeKey === '2d_by_1d_whole') {
+    domain = 'Whole Number Division';
+    let q;
+    do {
+      divisor = randInt(2, 9);
+      q = randInt(level >= 3 ? 4 : 2, level >= 3 ? 12 : 9);
+      dividend = divisor * q;
+    } while (dividend < 10 || dividend > 99);
+    correctVal = q;
+    question = `What is ${dividend} \u00F7 ${divisor}?`;
+    explanation = `${dividend} \u00F7 ${divisor} = ${q}.`;
+  } else if (typeKey === '2d_by_1d_decimal') {
+    domain = 'Division with Decimals';
+    divisor = randInt(2, 9);
+    let guard = 0;
+    do { dividend = randInt(10, 99); guard++; } while (dividend % divisor === 0 && guard < 30);
+    correctVal = Math.round((dividend / divisor) * 100) / 100;
+    question = `What is ${dividend} \u00F7 ${divisor}? (Round to 2 decimal places.)`;
+    explanation = `${dividend} \u00F7 ${divisor} = ${correctVal.toFixed(2)} (rounded to 2 decimal places).`;
+  } else if (typeKey === '2d_by_2d_whole') {
+    domain = 'Whole Number Division';
+    const q = randInt(2, level >= 3 ? 9 : 7);
+    const maxDivisor = Math.min(99, Math.floor(99 / q));
+    divisor = randInt(10, Math.max(10, maxDivisor));
+    dividend = divisor * q;
+    correctVal = q;
+    question = `What is ${dividend} \u00F7 ${divisor}?`;
+    explanation = `${dividend} \u00F7 ${divisor} = ${q}.`;
+  } else {
+    domain = 'Division with Decimals';
+    let guard = 0;
+    do { dividend = randInt(10, 99); divisor = randInt(10, 99); guard++; } while ((dividend % divisor === 0 || divisor === dividend) && guard < 30);
+    correctVal = Math.round((dividend / divisor) * 100) / 100;
+    question = `What is ${dividend} \u00F7 ${divisor}? (Round to 2 decimal places.)`;
+    explanation = `${dividend} \u00F7 ${divisor} = ${correctVal.toFixed(2)} (rounded to 2 decimal places).`;
+  }
+
+  const isDecimalType = typeKey.includes('decimal');
+  const correctText = isDecimalType ? correctVal.toFixed(2) : fmt(correctVal);
+  const primary = isDecimalType
+    ? [correctVal + 0.5, correctVal - 0.5, correctVal + 1, correctVal - 1, correctVal + 0.1, correctVal - 0.1].map(v => Math.round(v * 100) / 100)
+    : [correctVal + 1, correctVal - 1, correctVal + 2, correctVal - 2, correctVal * 2];
+  const distractors = ensureNumericDistractors(correctVal, primary, 3, spreadFallback(correctVal, 0.2, isDecimalType)).map(d => isDecimalType ? parseFloat(d).toFixed(2) : d);
+  return buildSingleQuestion(domain, question, correctText, distractors, explanation);
+}
+
+/* ---------- Addition ---------- */
+function genAddition(typeKey, level = 2) {
+  let a, b, domain = 'Addition';
+  if (typeKey === '2d_by_2d') { a = randInt(10, 99); b = randInt(10, 99); }
+  else if (typeKey === '3d_by_3d') { a = randInt(100, 999); b = randInt(100, 999); }
+  else {
+    const pairs = [[4, 5], [5, 6], [6, 7]];
+    const idx = level >= 3 ? 2 : (level >= 1 ? randInt(0, 2) : 0);
+    const [d1, d2] = pairs[idx];
+    a = randDigits(d1); b = randDigits(d2);
+  }
+  const correct = a + b;
+  const question = `What is ${a} + ${b}?`;
+  const explanation = `${a} + ${b} = ${correct}.`;
+  const primary = [correct + 10, correct - 10, correct + 100, correct - 100, a - b, Math.abs(a - b), correct + 1, correct - 1];
+  const spread = correct > 100000 ? 0.01 : (correct > 1000 ? 0.03 : 0.1);
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, spread, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+/* ---------- Subtraction ---------- */
+function genSubtraction(typeKey, level = 2) {
+  let a, b, domain = 'Subtraction';
+  if (typeKey === '3d_positive') {
+    a = randInt(100, 999);
+    const use3 = Math.random() < 0.5;
+    b = use3 ? randInt(100, a - 1 > 100 ? a - 1 : 101) : randInt(10, Math.min(99, a - 1));
+    if (b >= a) b = randInt(10, Math.max(10, a - 1));
+  } else if (typeKey === '3d_negative') {
+    a = randInt(100, 600);
+    b = randInt(a + 1, 999);
+  } else {
+    const digits = level >= 3 ? 7 : (level >= 1 ? randInt(5, 7) : 5);
+    a = randDigits(digits); b = randDigits(digits);
+  }
+  const correct = a - b;
+  const question = `What is ${a} - ${b}?`;
+  const explanation = `${a} - ${b} = ${correct}.`;
+  const primary = [correct + 10, correct - 10, correct + 100, correct - 100, -correct, b - a, correct + 1, correct - 1];
+  const magnitude = Math.max(1, Math.abs(correct));
+  const spread = magnitude > 100000 ? 0.01 : (magnitude > 1000 ? 0.03 : 0.12);
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, spread, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+/* ---------- Algebra (1-variable) ---------- */
+function genAlgebra1(level = 2) {
+  const domain = 'Solving Linear Equations';
+  const a = randInt(2, level >= 3 ? 12 : 6);
+  const x = randInt(level >= 2 ? -12 : 1, 12);
+  const b = randInt(1, level >= 3 ? 30 : 15) * (Math.random() < 0.5 ? 1 : -1);
+  const c = a * x + b;
+  const bStr = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+  const question = `Solve for x: ${a}x ${bStr} = ${c}`;
+  const correct = x;
+  const explanation = `${a}x ${bStr} = ${c}  =>  ${a}x = ${c - b}  =>  x = ${fmt(x)}.`;
+  const primary = [x + 1, x - 1, x + a, x - a, -x, b];
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, 0.6, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+/* ---------- Algebra (2-variable) ---------- */
+function genAlgebra2(level = 2) {
+  const domain = 'Systems of Equations';
+  const x = randInt(level >= 2 ? -10 : 1, 10);
+  const y = randInt(level >= 2 ? -10 : 1, 10);
+  let a1 = randInt(1, 5), b1 = randInt(1, 5), a2 = randInt(1, 5), b2 = randInt(1, 5), guard = 0;
+  while (a1 * b2 - a2 * b1 === 0 && guard < 30) { a2 = randInt(1, 5); b2 = randInt(1, 5); guard++; }
+  const c1 = a1 * x + b1 * y;
+  const c2 = a2 * x + b2 * y;
+  const askX = Math.random() < 0.5;
+  const question = `If ${a1}x + ${b1}y = ${c1} and ${a2}x + ${b2}y = ${c2}, what is the value of ${askX ? 'x' : 'y'}?`;
+  const correct = askX ? x : y;
+  const other = askX ? y : x;
+  const explanation = `Solving the system gives x = ${fmt(x)} and y = ${fmt(y)}. So ${askX ? 'x' : 'y'} = ${fmt(correct)}.`;
+  const primary = [other, correct + 1, correct - 1, -correct, correct + 2, correct - 2];
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, 0.6, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+/* ---------- Algebra (1-variable) — Given Variable Values: Evaluate ---------- */
+function genAlgebra1Evaluate(level = 2) {
+  const domain = 'Evaluating Expressions';
+  const a = randInt(2, level >= 3 ? 15 : (level >= 1 ? 10 : 6));
+  const x = randInt(level >= 2 ? -12 : 0, 12);
+  const b = randInt(1, level >= 3 ? 30 : 15) * (Math.random() < 0.5 ? 1 : -1);
+  const bStr = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+  const question = `${a}x ${bStr} = ?\nx = ${x}`;
+  const term1 = a * x;
+  const correct = term1 + b;
+  const explanation = `Substitute x = ${x}: ${a}(${x}) ${bStr} = ${fmt(term1)} ${bStr} = ${fmt(correct)}.`;
+  const primary = [correct + a, correct - a, correct + b, correct - b, term1, -correct];
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, 0.4, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+/* ---------- Algebra (2-variable) — Given Variable Values: Evaluate ---------- */
+function genAlgebra2Evaluate(level = 2) {
+  const domain = 'Evaluating Expressions';
+  const x = randInt(level >= 2 ? -10 : 0, 10);
+  const y = randInt(level >= 2 ? -10 : 0, 10);
+  const a1 = randInt(1, level >= 3 ? 12 : (level >= 1 ? 9 : 5));
+  const b1Signed = randInt(1, level >= 3 ? 12 : (level >= 1 ? 9 : 5)) * (level >= 1 && Math.random() < 0.4 ? -1 : 1);
+  const b1Abs = Math.abs(b1Signed);
+  const opStr = b1Signed >= 0 ? '+' : '-';
+  const question = `${a1}x ${opStr} ${b1Abs}y = ?\nx = ${x}, y = ${y}`;
+  const term1 = a1 * x;
+  const term2 = b1Signed * y;
+  const correct = term1 + term2;
+  const explanation = `Substitute x = ${x} and y = ${y}: ${a1}(${x}) ${opStr} ${b1Abs}(${y}) = ${fmt(term1)} ${term2 >= 0 ? '+' : '-'} ${fmt(Math.abs(term2))} = ${fmt(correct)}.`;
+  const primary = [term1, term2, correct + a1, correct - a1, correct + b1Abs, correct - b1Abs, -correct];
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, 0.4, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+/* =====================================================================
+   GEOMETRY — SVG drawing helpers
+   ===================================================================== */
+function rotatePoints(pts, angleDeg, center) {
+  const rad = angleDeg * Math.PI / 180;
+  return pts.map(([x, y]) => {
+    const dx = x - center[0], dy = y - center[1];
+    return [
+      Math.round(center[0] + dx * Math.cos(rad) - dy * Math.sin(rad)),
+      Math.round(center[1] + dx * Math.sin(rad) + dy * Math.cos(rad))
+    ];
+  });
+}
+
+function randomConvexPolygon(n, cx, cy, minR, maxR) {
+  let angles, guard = 0;
+  do {
+    angles = [];
+    for (let i = 0; i < n; i++) angles.push(Math.random() * 360);
+    angles.sort((a, b) => a - b);
+    guard++;
+  } while (guard < 10 && angles.some((a, i) => {
+    const next = i === angles.length - 1 ? angles[0] + 360 : angles[i + 1];
+    return (next - a) < (300 / n);
+  }));
+  return angles.map(a => {
+    const r = randInt(minR, maxR);
+    const rad = a * Math.PI / 180;
+    return [Math.round(cx + r * Math.cos(rad)), Math.round(cy + r * Math.sin(rad))];
+  });
+}
+
+function svgPolygonMarkup(points, opts = {}) {
+  const xs = points.map(p => p[0]), ys = points.map(p => p[1]);
+  const pad = 18;
+  const minX = Math.min(...xs) - pad, minY = Math.min(...ys) - pad;
+  const w = (Math.max(...xs) - Math.min(...xs)) + pad * 2;
+  const h = (Math.max(...ys) - Math.min(...ys)) + pad * 2;
+  const ptStr = points.map(p => p.join(',')).join(' ');
+  const closed = opts.closed !== false;
+  const tag = closed ? 'polygon' : 'polyline';
+  const fill = closed ? '#FFF3E0' : 'none';
+  return `<svg viewBox="${minX} ${minY} ${w} ${h}" width="220" height="170" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:12px auto;"><${tag} points="${ptStr}" fill="${fill}" stroke="#232F3E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+
+function svgCurvedMarkup(points) {
+  const xs = points.map(p => p[0]), ys = points.map(p => p[1]);
+  const pad = 18;
+  const minX = Math.min(...xs) - pad, minY = Math.min(...ys) - pad;
+  const w = (Math.max(...xs) - Math.min(...xs)) + pad * 2;
+  const h = (Math.max(...ys) - Math.min(...ys)) + pad * 2;
+  const [p0, p1, p2, p3] = points;
+  const cx = (p0[0] + p1[0] + p2[0] + p3[0]) / 4, cy = (p0[1] + p1[1] + p2[1] + p3[1]) / 4;
+  const midX = (p3[0] + p0[0]) / 2, midY = (p3[1] + p0[1]) / 2;
+  const ctrlX = midX + (midX - cx) * 1.1, ctrlY = midY + (midY - cy) * 1.1;
+  const d = `M ${p0[0]},${p0[1]} L ${p1[0]},${p1[1]} L ${p2[0]},${p2[1]} L ${p3[0]},${p3[1]} Q ${ctrlX},${ctrlY} ${p0[0]},${p0[1]}`;
+  return `<svg viewBox="${minX} ${minY} ${w} ${h}" width="220" height="170" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:12px auto;"><path d="${d}" fill="#FFF3E0" stroke="#232F3E" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/></svg>`;
+}
+
+function buildSquarePoints() {
+  const side = randInt(70, 100), cx = 100, cy = 90;
+  const pts = [[cx - side / 2, cy - side / 2], [cx + side / 2, cy - side / 2], [cx + side / 2, cy + side / 2], [cx - side / 2, cy + side / 2]];
+  return rotatePoints(pts, randInt(0, 40) - 20, [cx, cy]);
+}
+function buildRectanglePoints() {
+  let w, h;
+  do { w = randInt(80, 130); h = randInt(50, 90); } while (Math.abs(w - h) < 25);
+  const cx = 100, cy = 90;
+  const pts = [[cx - w / 2, cy - h / 2], [cx + w / 2, cy - h / 2], [cx + w / 2, cy + h / 2], [cx - w / 2, cy + h / 2]];
+  return rotatePoints(pts, randInt(0, 40) - 20, [cx, cy]);
+}
+function buildRhombusPoints() {
+  let w, h;
+  do { w = randInt(35, 75); h = randInt(35, 75); } while (Math.abs(w - h) < 18);
+  const cx = 100, cy = 90;
+  const pts = [[cx, cy - h], [cx + w, cy], [cx, cy + h], [cx - w, cy]];
+  return rotatePoints(pts, randInt(0, 40) - 20, [cx, cy]);
+}
+function buildParallelogramPoints() {
+  let w, h, shear, guard = 0, slant;
+  do {
+    w = randInt(70, 110); h = randInt(50, 80); shear = randInt(20, 45) * (Math.random() < 0.5 ? 1 : -1);
+    slant = Math.sqrt(shear * shear + h * h); guard++;
+  } while (Math.abs(w - slant) < 14 && guard < 20);
+  const x0 = 60, y0 = 45;
+  return [[x0, y0], [x0 + w, y0], [x0 + w + shear, y0 + h], [x0 + shear, y0 + h]];
+}
+function buildTrapezoidPoints() {
+  const wTop = randInt(45, 75), wBottom = wTop + randInt(35, 60), h = randInt(55, 85);
+  const cx = 100, topY = 35, botY = topY + h;
+  return [[cx - wTop / 2, topY], [cx + wTop / 2, topY], [cx + wBottom / 2, botY], [cx - wBottom / 2, botY]];
+}
+
+const QUAD_LABEL_POOL = ['Quadrilateral', 'Parallelogram', 'Rectangle', 'Square', 'Rhombus', 'Trapezoid', 'Kite', 'Not a Quadrilateral'];
+const QUAD_TRUE_SETS = {
+  square: ['Quadrilateral', 'Parallelogram', 'Rectangle', 'Square', 'Rhombus'],
+  rectangle: ['Quadrilateral', 'Parallelogram', 'Rectangle'],
+  rhombus: ['Quadrilateral', 'Parallelogram', 'Rhombus'],
+  parallelogram: ['Quadrilateral', 'Parallelogram'],
+  trapezoid: ['Quadrilateral', 'Trapezoid'],
+  irregular: ['Quadrilateral'],
+  fake: ['Not a Quadrilateral']
+};
+const QUAD_CORRECT_LABEL = { square: 'Square', rectangle: 'Rectangle', rhombus: 'Rhombus', parallelogram: 'Parallelogram', trapezoid: 'Trapezoid', irregular: 'Quadrilateral', fake: 'Not a Quadrilateral' };
+const SHAPE_PHRASE = { square: 'a square', rectangle: 'a rectangle', rhombus: 'a rhombus', parallelogram: 'a parallelogram', trapezoid: 'a trapezoid', irregular: 'this quadrilateral' };
+const QUAD_EXPLANATIONS = {
+  square: 'This shape is a square: all four sides are equal in length and all four angles are right angles. A square is also a special rectangle and a special rhombus, so it counts as a quadrilateral, a parallelogram, a rectangle, and a rhombus.',
+  rectangle: 'This shape is a rectangle: it has four right angles and two pairs of equal, parallel sides, but the sides are not all equal, so it is a quadrilateral and a parallelogram, but not a rhombus, square, or trapezoid.',
+  rhombus: 'This shape is a rhombus: all four sides are equal in length, but the angles are not right angles, so it is a quadrilateral and a parallelogram, but not a rectangle, square, or trapezoid.',
+  parallelogram: 'This shape is a parallelogram: it has two pairs of parallel sides, but the sides are not all equal and the angles are not right angles, so it is a quadrilateral and a parallelogram, but not a rectangle, square, rhombus, or trapezoid.',
+  trapezoid: 'This shape is a trapezoid: it has exactly one pair of parallel sides, so it is a quadrilateral and a trapezoid, but not a parallelogram, rectangle, square, or rhombus.',
+  irregular: 'This shape is an irregular quadrilateral: it has four straight sides and is fully closed, but no sides are parallel or equal, so it is only a quadrilateral — not a parallelogram, rectangle, square, rhombus, or trapezoid.',
+  fake: 'This is not a valid quadrilateral. A quadrilateral must be a closed shape made of exactly four straight sides that do not cross each other.'
+};
+
+function buildFakeShapeSVG() {
+  const variant = randInt(0, 3);
+  if (variant === 0) return svgPolygonMarkup(randomConvexPolygon(4, 100, 90, 45, 85), { closed: false });
+  if (variant === 1) return svgPolygonMarkup(randomConvexPolygon(5, 100, 90, 45, 85), { closed: true });
+  if (variant === 2) { const pts = randomConvexPolygon(4, 100, 90, 45, 85); [pts[1], pts[3]] = [pts[3], pts[1]]; return svgPolygonMarkup(pts, { closed: true }); }
+  return svgCurvedMarkup(randomConvexPolygon(4, 100, 90, 45, 85));
+}
+
+function genQuadShapeData(forceFake) {
+  const kinds = ['square', 'rectangle', 'rhombus', 'parallelogram', 'trapezoid', 'irregular'];
+  const kind = forceFake ? 'fake' : kinds[randInt(0, kinds.length - 1)];
+  if (kind === 'fake') return { kind, svg: buildFakeShapeSVG() };
+  let pts;
+  if (kind === 'square') pts = buildSquarePoints();
+  else if (kind === 'rectangle') pts = buildRectanglePoints();
+  else if (kind === 'rhombus') pts = buildRhombusPoints();
+  else if (kind === 'parallelogram') pts = buildParallelogramPoints();
+  else if (kind === 'trapezoid') pts = buildTrapezoidPoints();
+  else pts = randomConvexPolygon(4, 100, 90, 45, 85);
+  return { kind, svg: svgPolygonMarkup(pts, { closed: true }) };
+}
+
+function buildMultiQuestion(domain, questionText, optionPool, trueLabels, explanationBody) {
+  const letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+  const trueSet = new Set(trueLabels);
+  const shuffled = shuffleArr(optionPool);
+  const options = shuffled.map((label, idx) => ({
+    letter: letters[idx],
+    text: label,
+    correct: trueSet.has(label),
+    explanation: (trueSet.has(label) ? 'True. ' : 'False. ') + explanationBody
+  }));
+  return { domain, type: 'multi', question: questionText, options };
+}
+
+/* ---------- Identifying Quadrilaterals ---------- */
+function genIdentifyQuad() {
+  const domain = 'Identifying Quadrilaterals';
+  const forceFake = Math.random() < 0.22;
+  const { kind, svg } = genQuadShapeData(forceFake);
+  const correctLabel = QUAD_CORRECT_LABEL[kind];
+  const trueSet = new Set(QUAD_TRUE_SETS[kind]);
+  const falsePool = shuffleArr(QUAD_LABEL_POOL.filter(l => !trueSet.has(l)));
+  const distractors = falsePool.slice(0, 3);
+  const q = buildSingleQuestion(domain, 'What is this quadrilateral?', correctLabel, distractors, QUAD_EXPLANATIONS[kind]);
+  q.media = svg;
+  return q;
+}
+
+/* ---------- Quadrilateral Properties (multi-select) ---------- */
+function genQuadProperties() {
+  const domain = 'Quadrilateral Properties';
+  const forceFake = Math.random() < 0.28;
+  const { kind, svg } = genQuadShapeData(forceFake);
+  const phrase = kind === 'fake' ? 'this shape' : SHAPE_PHRASE[kind];
+  const question = `What are the properties of ${phrase}? (Choose all that apply)`;
+  const q = buildMultiQuestion(domain, question, QUAD_LABEL_POOL, QUAD_TRUE_SETS[kind], QUAD_EXPLANATIONS[kind]);
+  q.media = svg;
+  return q;
+}
+
+/* ---------- Triangle helpers ---------- */
+function triangleVertices(angle0Deg, angle1Deg, baseLen) {
+  const aRad = angle0Deg * Math.PI / 180, bRad = angle1Deg * Math.PI / 180, cRad = Math.PI - aRad - bRad;
+  const bSide = baseLen * Math.sin(bRad) / Math.sin(cRad);
+  const A = [0, 0], B = [baseLen, 0], C = [bSide * Math.cos(aRad), bSide * Math.sin(aRad)];
+  return [A, B, C];
+}
+
+function triangleSVG(angle0Deg, angle1Deg, labels) {
+  const raw = triangleVertices(angle0Deg, angle1Deg, 140);
+  const maxY = Math.max(...raw.map(p => p[1]));
+  const pts = raw.map(([x, y]) => [x, maxY - y]);
+  const pad = 26;
+  const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+  const minX = Math.min(...xs), maxX = Math.max(...xs), minYv = Math.min(...ys), maxYv = Math.max(...ys);
+  const vbX = minX - pad, vbY = minYv - pad, vbW = (maxX - minX) + pad * 2, vbH = (maxYv - minYv) + pad * 2;
+  const centroid = [(pts[0][0] + pts[1][0] + pts[2][0]) / 3, (pts[0][1] + pts[1][1] + pts[2][1]) / 3];
+  const labelPts = pts.map(p => [p[0] + 0.2 * (centroid[0] - p[0]), p[1] + 0.2 * (centroid[1] - p[1])]);
+  const ptStr = pts.map(p => p.join(',')).join(' ');
+  const labelsSvg = labelPts.map((p, i) => `<text x="${p[0].toFixed(1)}" y="${p[1].toFixed(1)}" font-size="13" font-weight="700" fill="#232F3E" text-anchor="middle" dominant-baseline="middle">${labels[i]}</text>`).join('');
+  return `<svg viewBox="${vbX.toFixed(1)} ${vbY.toFixed(1)} ${vbW.toFixed(1)} ${vbH.toFixed(1)}" width="220" height="180" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:12px auto;"><polygon points="${ptStr}" fill="#FFF3E0" stroke="#232F3E" stroke-width="3" stroke-linejoin="round"/>${labelsSvg}</svg>`;
+}
+function triangleSVGAll(angles) { return triangleSVG(angles[0], angles[1], angles.map(a => a + '\u00B0')); }
+
+function angleSVG(angleDeg) {
+  const cx = 100, cy = 100, r = 72, arcR = 32;
+  const rad = (angleDeg % 360) * Math.PI / 180;
+  const x1 = cx + r, y1 = cy;
+  const x2 = cx + r * Math.cos(-rad), y2 = cy + r * Math.sin(-rad);
+  const ax1 = cx + arcR, ay1 = cy;
+  const ax2 = cx + arcR * Math.cos(-rad), ay2 = cy + arcR * Math.sin(-rad);
+  const largeArc = (angleDeg % 360) > 180 ? 1 : 0;
+  return `<svg viewBox="0 0 200 200" width="200" height="200" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:12px auto;">
+    <line x1="${cx}" y1="${cy}" x2="${x1.toFixed(1)}" y2="${y1.toFixed(1)}" stroke="#232F3E" stroke-width="3"/>
+    <line x1="${cx}" y1="${cy}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#232F3E" stroke-width="3"/>
+    <path d="M ${ax1.toFixed(1)} ${ay1.toFixed(1)} A ${arcR} ${arcR} 0 ${largeArc} 1 ${ax2.toFixed(1)} ${ay2.toFixed(1)}" fill="none" stroke="#FF9900" stroke-width="2.5"/>
+    <circle cx="${cx}" cy="${cy}" r="3.5" fill="#232F3E"/>
+  </svg>`;
+}
+
+function randomTriangleAngles(rightChance, obtuseChance) {
+  const r = Math.random();
+  let a, b, c;
+  if (r < rightChance) {
+    a = 90; b = randInt(10, 79); c = 180 - a - b;
+  } else if (r < rightChance + obtuseChance) {
+    a = randInt(91, 150);
+    let guard = 0;
+    do { b = randInt(5, Math.max(5, 175 - a)); c = 180 - a - b; guard++; } while ((c < 5 || c >= 90) && guard < 25);
+    if (c < 5) { c = 5; b = 180 - a - c; }
+  } else {
+    let guard = 0;
+    do { a = randInt(20, 89); b = randInt(20, 89); c = 180 - a - b; guard++; } while ((c <= 0 || c >= 90 || c < 10) && guard < 30);
+    if (c <= 0 || c >= 90) { a = 60; b = 60; c = 60; }
+  }
+  return shuffleArr([a, b, c]);
+}
+
+function explainAngleCategory(cat) {
+  return {
+    Acute: 'An acute angle measures less than 90\u00B0.',
+    Right: 'A right angle measures exactly 90\u00B0.',
+    Obtuse: 'An obtuse angle measures more than 90\u00B0 but less than 180\u00B0.',
+    Straight: 'A straight angle measures exactly 180\u00B0.',
+    Reflex: 'A reflex angle measures more than 180\u00B0 but less than 360\u00B0.'
+  }[cat];
+}
+function explainTriangleAngleCat(cat, angles) {
+  if (cat === 'Right') return 'It has one 90\u00B0 angle, which makes it a right triangle.';
+  if (cat === 'Obtuse') return `Its largest angle (${Math.max(...angles)}\u00B0) is greater than 90\u00B0, which makes it an obtuse triangle.`;
+  return `All three angles (${angles.map(a => a + '\u00B0').join(', ')}) are less than 90\u00B0, which makes it an acute triangle.`;
+}
+function explainTriangleSide(cat, angles) {
+  if (cat === 'Equilateral') return 'All three angles are 60\u00B0, which means all three sides are equal, making this an equilateral triangle.';
+  if (cat === 'Isosceles') {
+    const counts = {};
+    angles.forEach(a => counts[a] = (counts[a] || 0) + 1);
+    const eq = Object.keys(counts).find(k => counts[k] >= 2);
+    return `Two of the angles are equal (${eq}\u00B0), which means two sides are equal, making this an isosceles triangle.`;
+  }
+  return `All three angles (${angles.map(a => a + '\u00B0').join(', ')}) are different, which means all three sides have different lengths, making this a scalene triangle.`;
+}
+
+/* ---------- Angles of Triangles (missing angle) ---------- */
+function genTriangleAngle() {
+  const domain = 'Angles of Triangles';
+  const angles = randomTriangleAngles(0.25, 0.25);
+  const hideIdx = randInt(0, 2);
+  const correct = angles[hideIdx];
+  const labels = angles.map((a, i) => i === hideIdx ? '?' : `${a}\u00B0`);
+  const svg = triangleSVG(angles[0], angles[1], labels);
+  const known = angles.filter((_, i) => i !== hideIdx);
+  const explanation = `The angles of a triangle always add up to 180\u00B0. ${known[0]}\u00B0 + ${known[1]}\u00B0 + ?\u00B0 = 180\u00B0, so the missing angle is ${correct}\u00B0.`;
+  const primary = [correct + 10, correct - 10, 180 - correct, correct + 5, correct - 5, Math.abs(known[0] - known[1])];
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, 0.3, false)).map(d => d + '\u00B0');
+  const q = buildSingleQuestion(domain, 'What is the missing angle in this triangle?', `${correct}\u00B0`, distractors, explanation);
+  q.media = svg;
+  return q;
+}
+
+/* ---------- Classifying Angles ---------- */
+function genClassifyAngle() {
+  const domain = 'Classifying Angles';
+  const categories = ['Acute', 'Right', 'Obtuse', 'Straight', 'Reflex'];
+  const cat = categories[randInt(0, categories.length - 1)];
+  let angle;
+  if (cat === 'Acute') angle = randInt(5, 89);
+  else if (cat === 'Right') angle = 90;
+  else if (cat === 'Obtuse') angle = randInt(91, 179);
+  else if (cat === 'Straight') angle = 180;
+  else angle = randInt(181, 355);
+  const svg = angleSVG(angle);
+  const distractors = shuffleArr(categories.filter(c => c !== cat)).slice(0, 3);
+  const q = buildSingleQuestion(domain, `What type of angle is ${angle}\u00B0?`, cat, distractors, explainAngleCategory(cat));
+  q.media = svg;
+  return q;
+}
+
+/* ---------- Classifying Triangles by Angle ---------- */
+function genClassifyTriangleAngle() {
+  const domain = 'Classifying Triangles by Angle';
+  const angles = randomTriangleAngles(0.32, 0.34);
+  const cat = angles.includes(90) ? 'Right' : (Math.max(...angles) > 90 ? 'Obtuse' : 'Acute');
+  const svg = triangleSVGAll(angles);
+  const distractors = ['Acute', 'Right', 'Obtuse'].filter(c => c !== cat);
+  const q = buildSingleQuestion(domain, 'What type of triangle is this, based on its angles?', cat, distractors, explainTriangleAngleCat(cat, angles));
+  q.media = svg;
+  return q;
+}
+
+/* ---------- Classifying Triangles by Side ---------- */
+function genClassifyTriangleSide() {
+  const domain = 'Classifying Triangles by Side';
+  const r = Math.random();
+  let angles, cat;
+  if (r < 0.28) { angles = [60, 60, 60]; cat = 'Equilateral'; }
+  else if (r < 0.68) {
+    let e, third, guard = 0;
+    do { e = randInt(20, 89); third = 180 - 2 * e; guard++; } while ((third <= 0 || third === e || third >= 178) && guard < 30);
+    angles = shuffleArr([e, e, third]); cat = 'Isosceles';
+  } else {
+    let a, b, c, guard = 0;
+    do { a = randInt(15, 150); b = randInt(15, Math.max(15, 163 - a)); c = 180 - a - b; guard++; } while ((a === b || b === c || a === c || c <= 0) && guard < 30);
+    angles = shuffleArr([a, b, c]); cat = 'Scalene';
+  }
+  const svg = triangleSVGAll(angles);
+  const distractors = ['Equilateral', 'Isosceles', 'Scalene'].filter(c => c !== cat);
+  const q = buildSingleQuestion(domain, 'What type of triangle is this, based on its sides?', cat, distractors, explainTriangleSide(cat, angles));
+  q.media = svg;
+  return q;
+}
+
+/* =====================================================================
+   MANIA MODE — random topic per question, occasional 2-topic combos,
+   always Hard difficulty. Geometry is excluded.
+   ===================================================================== */
+const MANIA_TOPIC_POOL = ['percentage', 'ratio', 'multiplication', 'division', 'addition', 'subtraction', 'algebra1', 'algebra2'];
+const MANIA_HARD_LEVEL = 2;
+
+function genManiaCombo() {
+  let n1, n2, n3, op1, op2, step1, correct, exprStr, domain;
+  if (Math.random() < 0.5) {
+    const order = Math.random() < 0.5 ? ['\u00D7', '\u00F7'] : ['\u00F7', '\u00D7'];
+    [op1, op2] = order;
+    if (op1 === '\u00D7') { n1 = randInt(2, 12); n2 = randInt(2, 12); step1 = n1 * n2; }
+    else { n2 = randInt(2, 12); const qq = randInt(2, 12); n1 = n2 * qq; step1 = qq; }
+    if (op2 === '\u00D7') { n3 = randInt(2, 12); correct = step1 * n3; }
+    else {
+      const divisors = [];
+      for (let d = 2; d <= Math.min(step1, 12); d++) { if (step1 % d === 0) divisors.push(d); }
+      if (divisors.length === 0) { n3 = 1; correct = step1; }
+      else { n3 = divisors[randInt(0, divisors.length - 1)]; correct = step1 / n3; }
+    }
+    exprStr = `${n1} ${op1} ${n2} ${op2} ${n3}`;
+    domain = 'Mixed: Multiplication & Division';
+  } else {
+    const order = Math.random() < 0.5 ? ['+', '-'] : ['-', '+'];
+    [op1, op2] = order;
+    n1 = randInt(10, 200); n2 = randInt(10, 200);
+    step1 = op1 === '+' ? n1 + n2 : n1 - n2;
+    n3 = randInt(10, 200);
+    correct = op2 === '+' ? step1 + n3 : step1 - n3;
+    exprStr = `${n1} ${op1} ${n2} ${op2} ${n3}`;
+    domain = 'Mixed: Addition & Subtraction';
+  }
+  const question = `${exprStr} = ?`;
+  const explanation = `Working left to right: ${n1} ${op1} ${n2} = ${fmt(step1)}, then ${fmt(step1)} ${op2} ${n3} = ${fmt(correct)}.`;
+  const primary = [step1, correct + n3, correct - n3, correct + 10, correct - 10, -correct];
+  const distractors = ensureNumericDistractors(correct, primary, 3, spreadFallback(correct, 0.3, false));
+  return buildSingleQuestion(domain, question, fmt(correct), distractors, explanation);
+}
+
+function generateManiaQuestion() {
+  if (Math.random() < 0.22) return genManiaCombo();
+  const topic = MANIA_TOPIC_POOL[randInt(0, MANIA_TOPIC_POOL.length - 1)];
+  const types = TOPIC_TYPES[topic];
+  const typeKey = types[randInt(0, types.length - 1)].value;
+  return GENERATORS[topic][typeKey](MANIA_HARD_LEVEL);
+}
+
+const GENERATORS = {
+  percentage: { regular: (lvl) => genPercentage(lvl) },
+  ratio: { small: (lvl) => genRatio('small', lvl), big: (lvl) => genRatio('big', lvl) },
+  multiplication: {
+    '1x1_to_1x2': (lvl) => genMultiplication('1x1_to_1x2', lvl),
+    '2x2_to_2x3': (lvl) => genMultiplication('2x2_to_2x3', lvl),
+    'long_3x3_to_3x4': (lvl) => genMultiplication('long_3x3_to_3x4', lvl)
+  },
+  division: {
+    '2d_by_1d_whole': (lvl) => genDivision('2d_by_1d_whole', lvl),
+    '2d_by_1d_decimal': (lvl) => genDivision('2d_by_1d_decimal', lvl),
+    '2d_by_2d_whole': (lvl) => genDivision('2d_by_2d_whole', lvl),
+    '2d_by_2d_decimal': (lvl) => genDivision('2d_by_2d_decimal', lvl)
+  },
+  addition: {
+    '2d_by_2d': (lvl) => genAddition('2d_by_2d', lvl),
+    '3d_by_3d': (lvl) => genAddition('3d_by_3d', lvl),
+    long_add: (lvl) => genAddition('long_add', lvl)
+  },
+  subtraction: {
+    '3d_positive': (lvl) => genSubtraction('3d_positive', lvl),
+    '3d_negative': (lvl) => genSubtraction('3d_negative', lvl),
+    long_sub: (lvl) => genSubtraction('long_sub', lvl)
+  },
+  algebra1: {
+    find_values: (lvl) => genAlgebra1(lvl),
+    evaluate: (lvl) => genAlgebra1Evaluate(lvl)
+  },
+  algebra2: {
+    find_values: (lvl) => genAlgebra2(lvl),
+    evaluate: (lvl) => genAlgebra2Evaluate(lvl)
+  },
+  geometry: {
+    triangle_angle: () => genTriangleAngle(),
+    classify_angle: () => genClassifyAngle(),
+    classify_triangle_angle: () => genClassifyTriangleAngle(),
+    classify_triangle_side: () => genClassifyTriangleSide(),
+    identify_quad: () => genIdentifyQuad(),
+    quad_properties: () => genQuadProperties()
+  }
+};
+
+function generateQuestion(topic, typeKey, level = 2) {
+  if (topic === 'mania') return generateManiaQuestion();
+  const topicGen = GENERATORS[topic];
+  if (!topicGen) return null;
+  const fn = topicGen[typeKey] || Object.values(topicGen)[0];
+  return fn(level);
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+/* =====================================================================
+   PRACTICE QUIZ ENGINE
+   ===================================================================== */
+const practice = {
+  topic: null, typeKey: null, total: 0, order: 'sequential', timerMinutes: 0,
+  questions: [], index: 0, score: 0, records: [], timerId: null, secondsLeft: 0, timedOut: false
+};
+
+function startPracticeQuiz(topic, typeKey, numQuestions, order, timerMinutes) {
+  practice.topic = topic; practice.typeKey = typeKey; practice.total = numQuestions;
+  practice.order = order; practice.timerMinutes = timerMinutes;
+  practice.questions = [];
+  for (let i = 0; i < numQuestions; i++) {
+    const level = order === 'sequential' ? Math.min(4, Math.floor((i / numQuestions) * 5)) : randInt(0, 4);
+    practice.questions.push(generateQuestion(topic, typeKey, level));
+  }
+  practice.index = 0; practice.score = 0; practice.records = []; practice.timedOut = false;
+
+  document.getElementById('setupRow').classList.add('hidden');
+  document.getElementById('quizScreen').classList.remove('hidden');
+  document.getElementById('resultsScreen').classList.add('hidden');
+
+  const badge = document.getElementById('topicBadge');
+  if (badge) badge.textContent = TOPIC_LABELS[topic] || topic;
+
+  clearInterval(practice.timerId);
+  const timerTag = document.getElementById('timerTag');
+  if (timerMinutes > 0) {
+    practice.secondsLeft = timerMinutes * 60;
+    timerTag.classList.remove('hidden');
+    updateTimerDisplay();
+    practice.timerId = setInterval(() => {
+      practice.secondsLeft--;
+      updateTimerDisplay();
+      if (practice.secondsLeft <= 0) {
+        clearInterval(practice.timerId);
+        practice.timedOut = true;
+        finishPracticeQuiz();
+      }
+    }, 1000);
+  } else {
+    timerTag.classList.add('hidden');
+  }
+
+  renderPracticeQuestion();
+}
+
+function updateTimerDisplay() {
+  const tag = document.getElementById('timerTag');
+  const m = Math.floor(Math.max(0, practice.secondsLeft) / 60);
+  const s = Math.max(0, practice.secondsLeft) % 60;
+  tag.textContent = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  tag.classList.toggle('timer-warning', practice.secondsLeft <= 60);
+}
+
+function renderPracticeQuestion() {
+  const q = practice.questions[practice.index];
+  const isMulti = q.type === 'multi';
+  document.getElementById('progressText').textContent = `Question ${practice.index + 1} of ${practice.total}`;
+  document.getElementById('progressFill').style.width = `${(practice.index / practice.total) * 100}%`;
+  document.getElementById('domainTag').textContent = q.domain;
+  document.getElementById('typeTag').textContent = isMulti ? 'Select All That Apply' : 'Single Answer';
+  document.getElementById('questionText').textContent = q.question;
+  document.getElementById('selectionHint').textContent = isMulti ? 'Select all that apply, then click Check Answer.' : '';
+  document.getElementById('resultBanner').className = 'result-banner hidden';
+  document.getElementById('questionMedia').innerHTML = q.media || '';
+
+  const container = document.getElementById('optionsContainer');
+  container.innerHTML = '';
+  const inputType = isMulti ? 'checkbox' : 'radio';
+  const inputName = isMulti ? 'practiceOptionMulti' : 'practiceOption';
+  q.options.forEach(opt => {
+    const label = document.createElement('label');
+    label.className = 'option';
+    label.innerHTML = `<input type="${inputType}" name="${inputName}" value="${opt.letter}"><span><span class="opt-letter">${opt.letter}.</span> ${escapeHtml(opt.text)}</span>`;
+    container.appendChild(label);
+    const explDiv = document.createElement('div');
+    explDiv.className = 'explanation-box';
+    explDiv.id = `expl-${opt.letter}`;
+    explDiv.textContent = opt.explanation;
+    container.appendChild(explDiv);
+  });
+  if (isMulti) {
+    container.addEventListener('change', e => {
+      if (e.target.name === inputName) e.target.closest('.option').classList.toggle('multi-pending', e.target.checked);
+    });
+  }
+  document.getElementById('checkBtn').classList.remove('hidden');
+  document.getElementById('nextBtn').classList.add('hidden');
+}
+
+function checkAnswer() {
+  const q = practice.questions[practice.index];
+  const isMulti = q.type === 'multi';
+  let selLetters, selOpts;
+  if (isMulti) {
+    const checked = document.querySelectorAll('input[name="practiceOptionMulti"]:checked');
+    if (checked.length === 0) { document.getElementById('selectionHint').textContent = 'Please select at least one answer before checking.'; return; }
+    selLetters = Array.from(checked).map(el => el.value);
+    selOpts = selLetters.map(l => q.options.find(o => o.letter === l));
+  } else {
+    const selected = document.querySelector('input[name="practiceOption"]:checked');
+    if (!selected) { document.getElementById('selectionHint').textContent = 'Please select an answer before checking.'; return; }
+    selLetters = [selected.value];
+    selOpts = [q.options.find(o => o.letter === selected.value)];
+  }
+  document.getElementById('selectionHint').textContent = '';
+  const correctOpts = q.options.filter(o => o.correct);
+  const correctSet = new Set(correctOpts.map(o => o.letter));
+  const selSet = new Set(selLetters);
+  const isCorrect = isMulti ? (selSet.size === correctSet.size && [...selSet].every(l => correctSet.has(l))) : selOpts[0].correct;
+
+  const inputName = isMulti ? 'practiceOptionMulti' : 'practiceOption';
+  document.querySelectorAll(`input[name="${inputName}"]`).forEach(inp => {
+    inp.disabled = true;
+    const optDiv = inp.closest('.option');
+    optDiv.classList.remove('multi-pending');
+    const optData = q.options.find(o => o.letter === inp.value);
+    if (optData.correct) optDiv.classList.add('correct-ans');
+    else if (selSet.has(inp.value)) optDiv.classList.add('wrong-ans');
+    const explDiv = document.getElementById(`expl-${inp.value}`);
+    if (explDiv) explDiv.classList.add('show', optData.correct ? 'exp-correct' : 'exp-wrong');
+  });
+
+  const banner = document.getElementById('resultBanner');
+  banner.classList.remove('hidden');
+  if (isCorrect) {
+    banner.className = 'result-banner correct';
+    banner.textContent = 'Correct! Well done.';
+    practice.score++;
+  } else {
+    banner.className = 'result-banner incorrect';
+    banner.textContent = isMulti
+      ? `Incorrect. Correct answer${correctOpts.length > 1 ? 's' : ''}: ${correctOpts.map(o => `${o.letter}. ${o.text}`).join(', ')}`
+      : `Incorrect. The correct answer is ${correctOpts[0].letter}. ${correctOpts[0].text}`;
+  }
+  practice.records.push({
+    question: q.question, isCorrect, skipped: false,
+    yourAnswer: selOpts.map(o => `${o.letter}. ${o.text}`).join(', '),
+    correctAnswer: correctOpts.map(o => `${o.letter}. ${o.text}`).join(', ')
+  });
+
+  document.getElementById('checkBtn').classList.add('hidden');
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.classList.remove('hidden');
+  nextBtn.textContent = practice.index === practice.total - 1 ? 'See Results \u2192' : 'Next Question \u2192';
+}
+
+function nextPracticeQuestion() {
+  practice.index++;
+  if (practice.index >= practice.total) {
+    clearInterval(practice.timerId);
+    finishPracticeQuiz();
+  } else {
+    renderPracticeQuestion();
+  }
+}
+
+function finishPracticeQuiz() {
+  clearInterval(practice.timerId);
+  if (practice.timedOut) {
+    for (let i = practice.records.length; i < practice.total; i++) {
+      const q = practice.questions[i];
+      const correctOpts = q.options.filter(o => o.correct);
+      practice.records.push({
+        question: q.question, isCorrect: false, skipped: true,
+        yourAnswer: '(no answer \u2014 time ran out)',
+        correctAnswer: correctOpts.map(o => `${o.letter}. ${o.text}`).join(', ')
+      });
+    }
+  }
+  renderPracticeResults();
+}
+
+function renderPracticeResults() {
+  document.getElementById('quizScreen').classList.add('hidden');
+  document.getElementById('resultsScreen').classList.remove('hidden');
+  const pct = Math.round((practice.score / practice.total) * 100);
+  document.getElementById('scoreCircle').textContent = `${pct}%`;
+  document.getElementById('scoreText').textContent = `You scored ${practice.score} out of ${practice.total}.`;
+  const timeUpNote = document.getElementById('timeUpNote');
+  if (practice.timedOut) {
+    timeUpNote.textContent = "Time's up! Unanswered questions were marked as skipped.";
+    timeUpNote.classList.remove('hidden');
+  } else {
+    timeUpNote.classList.add('hidden');
+  }
+  const body = document.getElementById('summaryBody');
+  body.innerHTML = '';
+  practice.records.forEach((r, idx) => {
+    const tr = document.createElement('tr');
+    const resultLabel = r.skipped ? '<span class="pill-skipped">Skipped</span>' : (r.isCorrect ? '<span class="pill-correct">Correct</span>' : '<span class="pill-wrong">Wrong</span>');
+    tr.innerHTML = `<td>${idx + 1}</td><td class="review-q">${escapeHtml(r.question)}</td><td>${resultLabel}</td><td>${escapeHtml(r.yourAnswer)}</td><td>${escapeHtml(r.correctAnswer)}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+/* =====================================================================
+   ENDLESS MODE ENGINE
+   ===================================================================== */
+let highScore = 0; // session-only (kept in memory, not persisted between page loads)
+
+const endless = { topic: null, typeKey: null, level: 0, score: 0, total: 0, current: null };
+
+function startEndlessMode(topic, typeKey) {
+  endless.topic = topic; endless.typeKey = typeKey; endless.level = 0; endless.score = 0; endless.total = 0;
+  document.getElementById('setupRow').classList.add('hidden');
+  document.getElementById('endlessScreen').classList.remove('hidden');
+  document.getElementById('endlessResultsScreen').classList.add('hidden');
+  document.getElementById('endlessHighScoreText').textContent = `Highest Score: ${highScore}`;
+  const badge = document.getElementById('topicBadge');
+  if (badge) badge.textContent = TOPIC_LABELS[topic] || topic;
+  updateEndlessSidebar();
+  nextEndlessQuestion();
+}
+
+function nextEndlessQuestion() {
+  endless.current = generateQuestion(endless.topic, endless.typeKey, endless.level);
+  const q = endless.current;
+  const isMulti = q.type === 'multi';
+  document.getElementById('endlessProgressText').textContent = `Question ${endless.total + 1}`;
+  document.getElementById('endlessDomainTag').textContent = q.domain;
+  document.getElementById('endlessDifficultyTag').textContent = isMulti ? 'Select All That Apply' : LEVEL_LABELS[endless.level];
+  document.getElementById('endlessQuestionText').textContent = q.question;
+  document.getElementById('endlessResultBanner').className = 'result-banner hidden';
+  document.getElementById('endlessQuestionMedia').innerHTML = q.media || '';
+
+  const container = document.getElementById('endlessOptionsContainer');
+  container.innerHTML = '';
+  const inputType = isMulti ? 'checkbox' : 'radio';
+  const inputName = isMulti ? 'endlessOptionMulti' : 'endlessOption';
+  q.options.forEach(opt => {
+    const label = document.createElement('label');
+    label.className = 'option';
+    label.innerHTML = `<input type="${inputType}" name="${inputName}" value="${opt.letter}"><span><span class="opt-letter">${opt.letter}.</span> ${escapeHtml(opt.text)}</span>`;
+    container.appendChild(label);
+    const explDiv = document.createElement('div');
+    explDiv.className = 'explanation-box';
+    explDiv.id = `endless-expl-${opt.letter}`;
+    explDiv.textContent = opt.explanation;
+    container.appendChild(explDiv);
+  });
+  if (isMulti) {
+    container.addEventListener('change', e => {
+      if (e.target.name === inputName) e.target.closest('.option').classList.toggle('multi-pending', e.target.checked);
+    });
+  }
+
+  const checkBtn = document.getElementById('endlessCheckBtn');
+  checkBtn.classList.remove('hidden');
+  checkBtn.disabled = isMulti ? false : true;
+  document.getElementById('endlessNextBtn').classList.add('hidden');
+  updateDiffLadder();
+}
+
+function checkEndlessAnswer() {
+  const q = endless.current;
+  const isMulti = q.type === 'multi';
+  let selLetters, selOpts;
+  if (isMulti) {
+    const checked = document.querySelectorAll('input[name="endlessOptionMulti"]:checked');
+    if (checked.length === 0) return;
+    selLetters = Array.from(checked).map(el => el.value);
+    selOpts = selLetters.map(l => q.options.find(o => o.letter === l));
+  } else {
+    const selected = document.querySelector('input[name="endlessOption"]:checked');
+    if (!selected) return;
+    selLetters = [selected.value];
+    selOpts = [q.options.find(o => o.letter === selected.value)];
+  }
+  const correctOpts = q.options.filter(o => o.correct);
+  const correctSet = new Set(correctOpts.map(o => o.letter));
+  const selSet = new Set(selLetters);
+  const isCorrect = isMulti ? (selSet.size === correctSet.size && [...selSet].every(l => correctSet.has(l))) : selOpts[0].correct;
+
+  const inputName = isMulti ? 'endlessOptionMulti' : 'endlessOption';
+  document.querySelectorAll(`input[name="${inputName}"]`).forEach(inp => {
+    inp.disabled = true;
+    const optDiv = inp.closest('.option');
+    optDiv.classList.remove('multi-pending');
+    const optData = q.options.find(o => o.letter === inp.value);
+    if (optData.correct) optDiv.classList.add('correct-ans');
+    else if (selSet.has(inp.value)) optDiv.classList.add('wrong-ans');
+    const explDiv = document.getElementById(`endless-expl-${inp.value}`);
+    if (explDiv) explDiv.classList.add('show', optData.correct ? 'exp-correct' : 'exp-wrong');
+  });
+
+  const banner = document.getElementById('endlessResultBanner');
+  banner.classList.remove('hidden');
+  endless.total++;
+  if (isCorrect) {
+    endless.score++;
+    banner.className = 'result-banner correct';
+    banner.textContent = endless.level < 4 ? 'Correct! Difficulty increasing.' : 'Correct! You\u2019re at the top difficulty.';
+    endless.level = Math.min(4, endless.level + 1);
+  } else {
+    banner.className = 'result-banner incorrect';
+    banner.textContent = isMulti
+      ? `Incorrect. Correct: ${correctOpts.map(o => `${o.letter}. ${o.text}`).join(', ')}`
+      : `Incorrect. The correct answer is ${correctOpts[0].letter}. ${correctOpts[0].text}`;
+    endless.level = Math.max(0, endless.level - 1);
+  }
+  updateEndlessSidebar();
+  document.getElementById('endlessCheckBtn').classList.add('hidden');
+  document.getElementById('endlessNextBtn').classList.remove('hidden');
+}
+
+function updateEndlessSidebar() {
+  document.getElementById('endlessScoreVal').textContent = endless.score;
+  document.getElementById('endlessTotalVal').textContent = endless.total;
+  document.getElementById('endlessSidebarHighVal').textContent = Math.max(highScore, endless.score);
+  updateDiffLadder();
+}
+
+function updateDiffLadder() {
+  document.querySelectorAll('.diff-step').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.level, 10) === endless.level);
+  });
+}
+
+function endEndlessMode() {
+  if (endless.score > highScore) highScore = endless.score;
+  document.getElementById('endlessScreen').classList.add('hidden');
+  document.getElementById('endlessResultsScreen').classList.remove('hidden');
+  document.getElementById('endlessScoreCircle').textContent = endless.score;
+  document.getElementById('endlessScoreText').textContent = `You answered ${endless.total} question${endless.total === 1 ? '' : 's'} and scored ${endless.score}.`;
+  const note = document.getElementById('endlessHighScoreNote');
+  note.textContent = (endless.score > 0 && endless.score >= highScore) ? 'New high score!' : `Highest score this session: ${highScore}`;
+  document.getElementById('endlessHighScoreText').textContent = `Highest Score: ${highScore}`;
+}
+
+/* =====================================================================
+   MANIA MODE ENGINE
+   ===================================================================== */
+let maniaHighScore = 0;
+const mania = { isEndless: false, total: 0, index: 0, score: 0, current: null, records: [] };
+
+function startManiaMode(numQuestions, isEndless) {
+  mania.isEndless = isEndless;
+  mania.total = isEndless ? Infinity : numQuestions;
+  mania.index = 0; mania.score = 0; mania.records = [];
+  document.getElementById('setupRow').classList.add('hidden');
+  document.getElementById('maniaScreen').classList.remove('hidden');
+  document.getElementById('maniaResultsScreen').classList.add('hidden');
+  document.getElementById('topicBadge').textContent = '\u26A1 Mania Mode';
+  renderManiaQuestion();
+}
+
+function renderManiaQuestion() {
+  mania.current = generateManiaQuestion();
+  const q = mania.current;
+  const isMulti = q.type === 'multi';
+  const qNum = mania.index + 1;
+  document.getElementById('maniaProgressText').textContent = mania.isEndless ? `Question ${qNum}` : `Question ${qNum} of ${mania.total}`;
+  document.getElementById('maniaProgressFill').style.width = mania.isEndless ? '0%' : `${(mania.index / mania.total) * 100}%`;
+  document.getElementById('maniaDomainTag').textContent = q.domain;
+  document.getElementById('maniaScoreTag').textContent = `Score: ${mania.score}`;
+  document.getElementById('maniaQuestionText').textContent = q.question;
+  document.getElementById('maniaSelectionHint').textContent = isMulti ? 'Select all that apply, then click Check Answer.' : '';
+  document.getElementById('maniaResultBanner').className = 'result-banner hidden';
+  document.getElementById('maniaQuestionMedia').innerHTML = q.media || '';
+
+  const container = document.getElementById('maniaOptionsContainer');
+  container.innerHTML = '';
+  const inputType = isMulti ? 'checkbox' : 'radio';
+  const inputName = isMulti ? 'maniaOptionMulti' : 'maniaOption';
+  q.options.forEach(opt => {
+    const label = document.createElement('label');
+    label.className = 'option';
+    label.innerHTML = `<input type="${inputType}" name="${inputName}" value="${opt.letter}"><span><span class="opt-letter">${opt.letter}.</span> ${escapeHtml(opt.text)}</span>`;
+    container.appendChild(label);
+    const explDiv = document.createElement('div');
+    explDiv.className = 'explanation-box';
+    explDiv.id = `mania-expl-${opt.letter}`;
+    explDiv.textContent = opt.explanation;
+    container.appendChild(explDiv);
+  });
+  if (isMulti) {
+    container.addEventListener('change', e => {
+      if (e.target.name === inputName) e.target.closest('.option').classList.toggle('multi-pending', e.target.checked);
+    });
+  }
+  document.getElementById('maniaCheckBtn').classList.remove('hidden');
+  document.getElementById('maniaNextBtn').classList.add('hidden');
+}
+
+function checkManiaAnswer() {
+  const q = mania.current;
+  const isMulti = q.type === 'multi';
+  let selLetters, selOpts;
+  if (isMulti) {
+    const checked = document.querySelectorAll('input[name="maniaOptionMulti"]:checked');
+    if (checked.length === 0) { document.getElementById('maniaSelectionHint').textContent = 'Please select at least one answer before checking.'; return; }
+    selLetters = Array.from(checked).map(el => el.value);
+    selOpts = selLetters.map(l => q.options.find(o => o.letter === l));
+  } else {
+    const selected = document.querySelector('input[name="maniaOption"]:checked');
+    if (!selected) { document.getElementById('maniaSelectionHint').textContent = 'Please select an answer before checking.'; return; }
+    selLetters = [selected.value];
+    selOpts = [q.options.find(o => o.letter === selected.value)];
+  }
+  document.getElementById('maniaSelectionHint').textContent = '';
+  const correctOpts = q.options.filter(o => o.correct);
+  const correctSet = new Set(correctOpts.map(o => o.letter));
+  const selSet = new Set(selLetters);
+  const isCorrect = isMulti ? (selSet.size === correctSet.size && [...selSet].every(l => correctSet.has(l))) : selOpts[0].correct;
+
+  const inputName = isMulti ? 'maniaOptionMulti' : 'maniaOption';
+  document.querySelectorAll(`input[name="${inputName}"]`).forEach(inp => {
+    inp.disabled = true;
+    const optDiv = inp.closest('.option');
+    optDiv.classList.remove('multi-pending');
+    const optData = q.options.find(o => o.letter === inp.value);
+    if (optData.correct) optDiv.classList.add('correct-ans');
+    else if (selSet.has(inp.value)) optDiv.classList.add('wrong-ans');
+    const explDiv = document.getElementById(`mania-expl-${inp.value}`);
+    if (explDiv) explDiv.classList.add('show', optData.correct ? 'exp-correct' : 'exp-wrong');
+  });
+
+  const banner = document.getElementById('maniaResultBanner');
+  banner.classList.remove('hidden');
+  if (isCorrect) {
+    mania.score++;
+    banner.className = 'result-banner correct';
+    banner.textContent = 'Correct!';
+  } else {
+    banner.className = 'result-banner incorrect';
+    banner.textContent = isMulti
+      ? `Incorrect. Correct answer${correctOpts.length > 1 ? 's' : ''}: ${correctOpts.map(o => `${o.letter}. ${o.text}`).join(', ')}`
+      : `Incorrect. The correct answer is ${correctOpts[0].letter}. ${correctOpts[0].text}`;
+  }
+  document.getElementById('maniaScoreTag').textContent = `Score: ${mania.score}`;
+
+  mania.records.push({
+    question: q.question, isCorrect, skipped: false,
+    yourAnswer: selOpts.map(o => `${o.letter}. ${o.text}`).join(', '),
+    correctAnswer: correctOpts.map(o => `${o.letter}. ${o.text}`).join(', ')
+  });
+
+  document.getElementById('maniaCheckBtn').classList.add('hidden');
+  const nextBtn = document.getElementById('maniaNextBtn');
+  nextBtn.classList.remove('hidden');
+  const isLast = !mania.isEndless && (mania.index + 1) >= mania.total;
+  nextBtn.textContent = isLast ? 'See Results \u2192' : 'Next Question \u2192';
+}
+
+function nextManiaQuestion() {
+  mania.index++;
+  if (!mania.isEndless && mania.index >= mania.total) { endManiaMode(); }
+  else { renderManiaQuestion(); }
+}
+
+function endManiaMode() {
+  if (mania.score > maniaHighScore) maniaHighScore = mania.score;
+  document.getElementById('maniaScreen').classList.add('hidden');
+  document.getElementById('maniaResultsScreen').classList.remove('hidden');
+  const total = mania.records.length;
+  const pct = total > 0 ? Math.round((mania.score / total) * 100) : 0;
+  document.getElementById('maniaResultsCircle').textContent = mania.isEndless ? mania.score : `${pct}%`;
+  document.getElementById('maniaResultsText').textContent = mania.isEndless
+    ? `You answered ${total} questions and scored ${mania.score} in Endless Mania!`
+    : `You scored ${mania.score} out of ${total} (${pct}%).`;
+  document.getElementById('maniaResultsHighScore').textContent =
+    (mania.score > 0 && mania.score >= maniaHighScore) ? '\uD83D\uDD25 New Mania high score!' : `Highest Mania score this session: ${maniaHighScore}`;
+  const body = document.getElementById('maniaSummaryBody');
+  body.innerHTML = '';
+  mania.records.forEach((r, idx) => {
+    const tr = document.createElement('tr');
+    const label = r.isCorrect ? '<span class="pill-correct">Correct</span>' : '<span class="pill-wrong">Wrong</span>';
+    tr.innerHTML = `<td>${idx + 1}</td><td class="review-q">${escapeHtml(r.question)}</td><td>${label}</td><td>${escapeHtml(r.yourAnswer)}</td><td>${escapeHtml(r.correctAnswer)}</td>`;
+    body.appendChild(tr);
+  });
+}
+
+/* =====================================================================
+   WIRE UP EVENTS
+   ===================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+  const topicSelect = document.getElementById('topicSelect');
+  const topicTypeSelect = document.getElementById('topicTypeSelect');
+  const endlessTopicSelect = document.getElementById('endlessTopicSelect');
+  const endlessTopicTypeSelect = document.getElementById('endlessTopicTypeSelect');
+
+  populateTopicType(topicTypeSelect, topicSelect.value);
+  populateTopicType(endlessTopicTypeSelect, endlessTopicSelect.value);
+
+  topicSelect.addEventListener('change', (e) => {
+    populateTopicType(topicTypeSelect, e.target.value);
+    document.getElementById('topicBadge').textContent = TOPIC_LABELS[e.target.value] || e.target.value;
+  });
+  endlessTopicSelect.addEventListener('change', (e) => {
+    populateTopicType(endlessTopicTypeSelect, e.target.value);
+  });
+
+  // Practice Quiz
+  document.getElementById('startBtn').addEventListener('click', () => {
+    const topic = topicSelect.value;
+    const typeKey = topicTypeSelect.value;
+    const num = parseInt(document.getElementById('numQuestions').value, 10);
+    const order = document.getElementById('qOrder').value;
+    const timerMin = parseInt(document.getElementById('timerSelect').value, 10);
+    startPracticeQuiz(topic, typeKey, num, order, timerMin);
+  });
+  document.getElementById('checkBtn').addEventListener('click', checkAnswer);
+  document.getElementById('nextBtn').addEventListener('click', nextPracticeQuestion);
+  document.getElementById('restartBtn').addEventListener('click', () => {
+    document.getElementById('resultsScreen').classList.add('hidden');
+    document.getElementById('setupRow').classList.remove('hidden');
+  });
+
+  // Endless Mode
+  document.getElementById('startEndlessBtn').addEventListener('click', () => {
+    startEndlessMode(endlessTopicSelect.value, endlessTopicTypeSelect.value);
+  });
+  document.getElementById('endlessCheckBtn').addEventListener('click', checkEndlessAnswer);
+  document.getElementById('endlessNextBtn').addEventListener('click', nextEndlessQuestion);
+  document.getElementById('endEndlessBtn').addEventListener('click', endEndlessMode);
+  document.getElementById('endlessRestartBtn').addEventListener('click', () => {
+    document.getElementById('endlessResultsScreen').classList.add('hidden');
+    document.getElementById('setupRow').classList.remove('hidden');
+  });
+  // Enable check button for endless single-answer (radio)
+  document.getElementById('endlessOptionsContainer').addEventListener('change', (e) => {
+    if (e.target.name === 'endlessOption') document.getElementById('endlessCheckBtn').disabled = false;
+  });
+
+  // Mania Mode
+  document.getElementById('startManiaBtn').addEventListener('click', () => {
+    const num = parseInt(document.getElementById('maniaNumQuestions').value, 10);
+    startManiaMode(num, false);
+  });
+  document.getElementById('startEndlessManiaBtn').addEventListener('click', () => {
+    startManiaMode(0, true);
+  });
+  document.getElementById('maniaCheckBtn').addEventListener('click', checkManiaAnswer);
+  document.getElementById('maniaNextBtn').addEventListener('click', nextManiaQuestion);
+  document.getElementById('endManiaBtn').addEventListener('click', endManiaMode);
+  document.getElementById('maniaRestartBtn').addEventListener('click', () => {
+    document.getElementById('maniaResultsScreen').classList.add('hidden');
+    document.getElementById('setupRow').classList.remove('hidden');
+    document.getElementById('topicBadge').textContent = TOPIC_LABELS[topicSelect.value] || topicSelect.value;
+  });
+});
+</script>
+</body>
+</html>
